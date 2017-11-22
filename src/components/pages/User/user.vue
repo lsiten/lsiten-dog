@@ -200,6 +200,7 @@ export default {
   logout(){
     this.$store.commit("USER_LOGOUT");
     this.user={};
+    this.$router.replace({name:"login"});
   },
 
     choosePhoto() {
@@ -225,8 +226,7 @@ export default {
         body: {
           accessToken: this.user.accessToken,
           timestamp: this.timestamp,
-          folder: "appDog/avatar",
-          tags: "app,avatar"
+          type: "avatar"
         },
         cb: this.cbSignature
       };
@@ -235,19 +235,9 @@ export default {
     //获取完signature的回调
     cbSignature(data) {
       if (data.success) {
-        let signature = data.data.signature;
-        let tags = "app,avatar";
-        let folder = "appDog/avatar";
-        let that = this;
-        signature =
-          "folder=" +
-          folder +
-          "&tags=" +
-          tags +
-          "&timestamp=" +
-          this.timestamp +
-          this.config.cloudinary.api_secret;
-        signature = sha1(signature);
+        let signature = data.obj.signature;
+        let folder = data.obj.folder;
+        let tags = data.obj.tags;
         let body = new FormData();
         body.append("folder", folder);
         body.append("signature", signature);
@@ -268,6 +258,13 @@ export default {
           uploading: this.onUploading
         };
         this.$store.dispatch("uploadImage", param);
+      }
+      else
+      {
+        this.$vux.toast.show({
+            text:data.obj.errorMsg,
+            type:"error"
+        })
       }
     },
     //正在上传的回调函数
@@ -325,6 +322,14 @@ export default {
     //用户信息更新回调
     cbUserUpdate(data) {
       if (data.success) {
+        if(data.obj.isempty)
+        {
+          this.$vux.toast.show({
+              text:data.obj.tips,
+              type:"error"
+          })
+          return;
+        }
         if (this.isAvatar) {
           this.$vux.toast.show({
             text: "头像更新成功",
@@ -335,8 +340,15 @@ export default {
         else{
           this._closeEdit();
         }
-        this.user = _.assign(this.user, data.data);
+        this.user = _.assign(this.user, data.obj);
+        this.user.sex = parseInt(this.user.sex);
         this.$store.commit("UPDATE_USER_ALL", this.user); 
+      }
+      else{
+        this.$vux.toast.show({
+            text:data.obj.errorMsg,
+            type:"error"
+        })
       }
     }
   },

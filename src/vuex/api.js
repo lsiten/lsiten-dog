@@ -23,8 +23,8 @@ let fun_axios_post = (api, body, cb) => {
   axios.post(api, body)
     .then((res) => {
       if (res.status >= 200 && res.status < 300) {
-        let data = Mock.mock(res.data);
-        cb(data);
+        //let data = Mock.mock(res.data);
+        cb(res.data);
       }
     })
     .catch((err) => {

@@ -18,15 +18,16 @@ const state = {
   //配置信息
   config: {
     url: {
-      base: 'http://rapapi.org/mockjs/28885',
+      //base: 'http://rapapi.org/mockjs/28885',
+      base: 'http://192.168.1.62/api.php',
       videoList: '/api/videoList',
       like: '/api/like',
       coment: '/api/coment',
       subComent: '/api/subComent',
-      verifyCode: '/api/u/signup',
-      doLogin: '/api/u/verify',
-      imageSignature: '/api/imageSignature',
-      update: '/api/u/update',
+      verifyCode: '/api/user/signup',
+      doLogin: '/api/user/verify',
+      imageSignature: '/api/index/signature',
+      update: '/api/user/update',
     },
     cloudinary: {
       cloud_name: 'lsiten',
