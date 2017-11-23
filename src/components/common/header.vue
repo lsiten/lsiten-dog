@@ -38,7 +38,7 @@ export default {
     }),
     websiteTitle () {
       if (this.route.path === '/') return '首页'
-      if (this.route.path === '/record') return '录制'
+      if (this.route.path === '/record') return '理解狗狗，从配音开始'
       if (this.route.path === '/user') return '我的'
       if (this.route.name === 'videoDetail') return '视频详情'
       if (this.route.name === 'error') return '页面错误'

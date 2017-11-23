@@ -12,7 +12,17 @@
     },
     "cordova-plugin-whitelist": {
       "PACKAGE_NAME": "cn.lsiten.dog"
+    },
+    "cordova-plugin-media-capture": {
+      "PACKAGE_NAME": "cn.lsiten.dog"
+    },
+    "com.hutchind.cordova.plugins.streamingmedia": {
+      "PACKAGE_NAME": "cn.lsiten.dog"
     }
   },
-  "dependent_plugins": {}
+  "dependent_plugins": {
+    "cordova-plugin-file": {
+      "PACKAGE_NAME": "cn.lsiten.dog"
+    }
+  }
 }

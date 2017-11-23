@@ -29,6 +29,10 @@ const state = {
       imageSignature: '/api/index/signature',
       update: '/api/user/update',
     },
+    qiniu:{
+      upload:"http://upload.qiniu.com/",
+      fileUrl: "http://ozuexev9i.bkt.clouddn.com"
+    },
     cloudinary: {
       cloud_name: 'lsiten',
       api_key: '384266963481284',

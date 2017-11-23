@@ -52,6 +52,18 @@ export default {
           option.sourceType = this.cordova.camera.PictureSourceType.CAMERA;
           option.allowEdit = true;
           break;
+        case "video":
+          option = {
+                quality: 50,
+                destinationType: this.cordova.camera.DestinationType.DATA_URL,
+                sourceType: this.cordova.camera.PictureSourceType.PHOTOLIBRARY,
+                mediaType: 1
+              };   
+         break;
+        case "takeVideo":
+          this.captureVideo();
+          return;
+        break;
       }
       //扩展option
       if (this.imageOption) {
@@ -72,6 +84,21 @@ export default {
           option
         );
       });
+    },
+
+    //录制视频
+    captureVideo(){
+      let that = this;
+      this.cordova.on("deviceready", () => {
+        //开始录像（最长录制时间：10秒）
+        navigator.device.capture.captureVideo(function(mediaFiles){
+          // 显示提示信息
+          that.$emit("success", mediaFiles);
+        }, function(error){
+          // 显示提示信息
+          that.$emit("error", error);
+        }, {duration: 10});
+      })
     }
   }
 };
