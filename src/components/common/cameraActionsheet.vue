@@ -55,7 +55,7 @@ export default {
         case "video":
           option = {
                 quality: 50,
-                destinationType: this.cordova.camera.DestinationType.DATA_URL,
+                destinationType: this.cordova.camera.DestinationType.NATIVE_URI,
                 sourceType: this.cordova.camera.PictureSourceType.PHOTOLIBRARY,
                 mediaType: 1
               };   

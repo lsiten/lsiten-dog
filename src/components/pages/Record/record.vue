@@ -39,6 +39,8 @@ import cameraActionsheet from "../../common/cameraActionsheet";
 console.log(myVideo);
 export default {
   created(){
+    console.log(window);
+    console.log(cordova);
   },
   data() {
     return {
@@ -53,7 +55,7 @@ export default {
             type: 'video/mp4'
            }],
         options: {
-            autoplay: false,
+            autoplay: true,
             volume: 0.6,
             poster: ''
           }
@@ -86,30 +88,33 @@ export default {
     //   length: 1
     //   __proto__: Array[0]
       // 显示
-    let videoUrl;
+    let url = "";
       if(files[0].fullPath)
       {
-        // this.videoCongfig.sources[0].src = files[0].localURL;
-        videoUrl = files[0].fullPath;
-        console.log(files[0].fullPath);
+        url = files[0].localURL;
+        this.videoCongfig.sources[0].src = url;
       }
       else
       {
-        videoUrl = "file://"+files;
-        // this.videoCongfig.sources[0].src = "file://"+files;
+        url = "file://"+files;
+        let that = this;
+        window.resolveLocalFileSystemURL(url,function(enter){
+          url = enter.toInternalURL();
+          that.videoCongfig.sources[0].src = url;
+        })
       }
-      let options = {
-            successCallback: function() {
-              console.log("Video was closed without error.");
-            },
-            errorCallback: function(errMsg) {
-              console.log("Error! " + errMsg);
-            },
-            orientation: 'landscape',
-            shouldAutoClose: true,  // true(default)/false
-            controls: true // true(default)/false. Used to hide controls on fullscreen
-          };
-          window.plugins.streamingMedia.playVideo(videoUrl, options);
+      // let options = {
+      //       successCallback: function() {
+      //         console.log("Video was closed without error.");
+      //       },
+      //       errorCallback: function(errMsg) {
+      //         console.log("Error! " + errMsg);
+      //       },
+      //       orientation: 'landscape',
+      //       shouldAutoClose: true,  // true(default)/false
+      //       controls: true // true(default)/false. Used to hide controls on fullscreen
+      //     };
+      //     window.plugins.streamingMedia.playVideo(videoUrl, options);
     },
     cameraError(message) {
        // 显示
