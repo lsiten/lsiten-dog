@@ -31,6 +31,10 @@
             {
               "xml": "<feature name=\"StreamingMedia\"><param name=\"android-package\" value=\"com.hutchind.cordova.plugins.streamingmedia.StreamingMedia\" /></feature>",
               "count": 1
+            },
+            {
+              "xml": "<feature name=\"FileTransfer\"><param name=\"android-package\" value=\"org.apache.cordova.filetransfer.FileTransfer\" /></feature>",
+              "count": 1
             }
           ]
         }
@@ -40,7 +44,7 @@
           "/*": [
             {
               "xml": "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />",
-              "count": 3
+              "count": 4
             },
             {
               "xml": "<uses-permission android:name=\"android.permission.RECORD_AUDIO\" />",
@@ -95,6 +99,9 @@
       "PACKAGE_NAME": "cn.lsiten.dog"
     },
     "com.hutchind.cordova.plugins.streamingmedia": {
+      "PACKAGE_NAME": "cn.lsiten.dog"
+    },
+    "cordova-plugin-file-transfer": {
       "PACKAGE_NAME": "cn.lsiten.dog"
     }
   },
@@ -380,6 +387,22 @@
       "clobbers": [
         "streamingMedia"
       ]
+    },
+    {
+      "id": "cordova-plugin-file-transfer.FileTransferError",
+      "file": "plugins/cordova-plugin-file-transfer/www/FileTransferError.js",
+      "pluginId": "cordova-plugin-file-transfer",
+      "clobbers": [
+        "window.FileTransferError"
+      ]
+    },
+    {
+      "id": "cordova-plugin-file-transfer.FileTransfer",
+      "file": "plugins/cordova-plugin-file-transfer/www/FileTransfer.js",
+      "pluginId": "cordova-plugin-file-transfer",
+      "clobbers": [
+        "window.FileTransfer"
+      ]
     }
   ],
   "plugin_metadata": {
@@ -387,6 +410,7 @@
     "cordova-plugin-whitelist": "1.3.3",
     "cordova-plugin-file": "5.0.0",
     "cordova-plugin-media-capture": "2.0.0",
-    "com.hutchind.cordova.plugins.streamingmedia": "0.1.4"
+    "com.hutchind.cordova.plugins.streamingmedia": "0.1.4",
+    "cordova-plugin-file-transfer": "1.7.0"
   }
 }

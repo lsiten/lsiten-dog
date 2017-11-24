@@ -18,6 +18,9 @@
     },
     "com.hutchind.cordova.plugins.streamingmedia": {
       "PACKAGE_NAME": "cn.lsiten.dog"
+    },
+    "cordova-plugin-file-transfer": {
+      "PACKAGE_NAME": "cn.lsiten.dog"
     }
   },
   "dependent_plugins": {

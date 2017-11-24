@@ -15,6 +15,13 @@ const state = {
   isLoading: false,
   direction: 'forward',
   drawerVisibility: false,
+  rightOptions:{
+                  option:{showMore: false},
+                  rightContent:"",
+                  action:function(){
+                    return ;
+                  }
+     },
   //配置信息
   config: {
     url: {
@@ -90,6 +97,10 @@ const mutations = {
   [types.USER_LOGOUT](state, user) {
     store.remove("user");
     state.user = {}; 
+  },
+  [types.SET_HEADER_RIGHT](state, rightOptions) {
+    console.log(rightOptions);
+    state.rightOptions = rightOptions; 
   }
 
 }
@@ -114,10 +125,10 @@ const actions = {
     api.doLogin(params.api, params.body, params.doLogin);
   },
   //获取图片signature
-  getImageSignature({
+  getSignature({
     commit
   }, params) {
-    api.getImageSignature(params.api, params.body, params.cb)
+    api.getSignature(params.api, params.body, params.cb)
   },
 
   //获取图片signature

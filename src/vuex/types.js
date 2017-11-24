@@ -8,3 +8,6 @@
  //用户登陆
 export const UPDATE_USER_ALL = 'UPDATE_USER_ALL' ;
 export const USER_LOGOUT = 'USER_LOGOUT' ;
+
+//header设置
+export const SET_HEADER_RIGHT = 'SET_HEADER_RIGHT' ;

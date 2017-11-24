@@ -8,7 +8,7 @@
   <div style="height:100%;">
       <l-header style="margin-top:46px"></l-header>
       <div class="videoDetail">
-            <my-video :sources="videoCongfig.sources" :options="videoCongfig.options"></my-video>
+            <video-player :src="videoSrc" :options="videoOptions"></video-player>
             <div class="infoBox">
                 <img :src="video.author.avatar"/>
                 <div class="descBox">
@@ -71,21 +71,21 @@ import {
   XButton
 } from "vux";
 import { mapState } from "vuex";
-import myVideo from 'vue-video';
 import axios from "axios";
 import Mock from "mockjs";
 import queryString from "query-string";
 import store from "store";
 
 import header from "../../common/header.vue";
+import videoPlayer from "../../common/videoPlay";
 export default {
   props: ["video"],
   directives: {
     TransferDom
   },
   created() {
-    this.videoCongfig.options.poster = this.video.thumb;
-    this.videoCongfig.sources[0].src = this.video.video;
+    this.videoOptions.poster = this.video.thumb;
+    this.videoSrc = this.video.video;
     this._initStore();
   },
   mounted() {
@@ -99,7 +99,7 @@ export default {
     Group,
     XButton,
     "l-header": header,
-    myVideo
+    videoPlayer
   },
   methods: {
     _toBack() {
@@ -236,16 +236,13 @@ export default {
   },
   data() {
     return {
-      videoCongfig: {
-        sources: [{
-            src: '',
-            type: 'video/mp4'
-           }],
-        options: {
-            autoplay: false,
-            volume: 0.6,
-            poster: ''
-          }
+      videoSrc:"",
+      videoOptions:{
+        playStatus:null,
+        muteStatus:'',
+        height:"280",
+        width:"100%",
+        poster:""
       },
       comentsLists: [],
       comentVisitable: false,

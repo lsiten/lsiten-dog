@@ -63,4 +63,7 @@
     <feature name="StreamingMedia">
         <param name="ios-package" value="StreamingMedia" />
     </feature>
+    <feature name="FileTransfer">
+        <param name="ios-package" value="CDVFileTransfer" />
+    </feature>
 </widget>

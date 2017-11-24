@@ -66,7 +66,7 @@ export default {
     fun_axios_post(api, body, cb)
   },
   //获取图片signature
-  getImageSignature: (api, body, cb) => {
+  getSignature: (api, body, cb) => {
     fun_axios_post(api, body, cb)
   },
   //上传文件
@@ -74,7 +74,7 @@ export default {
     fun_axios_upload(api, body, header, cb, uploading)
   },
 
-  //
+  //更新用户信息
   updateUser: (api, body, cb) => {
     fun_axios_post(api, body, cb)
   }

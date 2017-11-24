@@ -5,8 +5,13 @@
     :right-options="rightOptions"
     :title="websiteTitle"
     :transition="headerTransition"
-    @on-click-back = "clickBack"
+    @on-click-back = "clickBack"    
     style="background-color:#F67252;width:100%;position:absolute;left:0;top:0;z-index:100;">
+    <div slot="right">
+      <div style="color:#fff;border-left:1px solid rgb(241, 139, 139);padding-left:7px;" @click="clickMore">
+        {{this.rightOptionsData.rightContent}}
+      </div>
+    </div>
   </x-header>
 </div>
 </template>
@@ -14,6 +19,7 @@
 <script>
 import { XHeader } from 'vux';
 import {mapState,mapMutations} from 'vuex';
+import changeVideo from "../pages/Record/changeVideo"
 export default {
   methods: {
     ...mapMutations(['updateDrawerVisibility']),
@@ -26,6 +32,10 @@ export default {
         let backUrl = {name:from.name,params:from.params};
         this.$router.replace(backUrl);
       }
+    },
+    clickMore(){
+      console.log(1);
+      this.rightOptionsData.action();
     }
   },
   computed: {
@@ -34,7 +44,8 @@ export default {
       path: state => state.route.path,
       direction: state => state.direction,
       drawerVisibility: state => state.drawerVisibility,
-      websiteTitle: state => state.websiteTitle
+      websiteTitle: state => state.websiteTitle,
+      rightOptionsData: state => state.rightOptions
     }),
     websiteTitle () {
       if (this.route.path === '/') return '首页'
@@ -51,16 +62,15 @@ export default {
       }
     },
     rightOptions () {
-      return {
-        showMore: false
-      }
+      return this.rightOptionsData.option
     },
     headerTransition () {
       return this.direction === 'forward' ? 'vux-header-fade-in-right' : 'vux-header-fade-in-left'
     }
   },
   components:{
-    XHeader
+    XHeader,
+    changeVideo
   }
 }
 </script>

@@ -10,20 +10,32 @@
     <content src="index.html" />
     <access origin="*" />
     <access origin="cdvfile://*" />
+    <access origin="file://*" />
+    <access origin="file:///*" />
+    <allow-intent href="cdvfile://*" />
+    <allow-intent href="file://*" />
+    <allow-intent href="file:///*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
+    <allow-navigation href="cdvfile://*" />
+    <allow-navigation href="file://*" />
+    <allow-navigation href="file:///*" />
     <platform name="android">
         <allow-intent href="market:*" />
+        <preference name="AndroidPersistentFileLocation" value="Internal" />
+        <preference name="AndroidPersistentFileLocation" value="Compatibility" />
         <preference name="AndroidExtraFilesystems" value="files,files-external,documents,sdcard,cache,cache-external,assets,root" />
     </platform>
     <platform name="ios">
-        <preference name="iosExtraFilesystems" value="library,library-nosync,documents,documents-nosync,cache,bundle,root" />
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
+        <preference name="iosPersistentFileLocation" value="Library" />
+        <preference name="iosPersistentFileLocation" value="Compatibility" />
+        <preference name="iosExtraFilesystems" value="library,library-nosync,documents,documents-nosync,cache,bundle,root" />
     </platform>
     <engine name="android" spec="^6.4.0" />
     <engine name="ios" spec="^4.5.4" />
@@ -31,4 +43,5 @@
     <plugin name="cordova-plugin-camera" spec="^3.0.0" />
     <plugin name="cordova-plugin-media-capture" spec="^2.0.0" />
     <plugin name="com.hutchind.cordova.plugins.streamingmedia" spec="~0.1.4" />
+    <plugin name="cordova-plugin-file-transfer" spec="^1.7.0" />
 </widget>

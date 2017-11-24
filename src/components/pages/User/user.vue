@@ -231,6 +231,7 @@ export default {
       //七牛图床实现
       let body = {
           accessToken: this.user.accessToken,
+          type: "avatar",
           cloud:"qiniu"
         };    
       let param = {
@@ -238,7 +239,7 @@ export default {
         body: body,
         cb: this.cbSignature
       };
-      this.$store.dispatch("getImageSignature", param);
+      this.$store.dispatch("getSignature", param);
     },
      //获取base64转blob
     dataURItoBlob(dataURI) {

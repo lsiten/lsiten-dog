@@ -6,8 +6,28 @@
  */
 <template>
   <div class="record">
-    <my-video :sources="videoCongfig.sources" :options="videoCongfig.options" v-show="videoCongfig.sources[0].src"></my-video>
-    <div class="recordBox" @click="showCamera" v-show="!videoCongfig.sources[0].src">
+    <div class="videoBox" v-show="isUpload || videoSrc">
+        <div v-show="videoSrc">
+          <video-player :src="videoSrc" :options="videoOptions"></video-player>
+        </div>
+        <div class="loadvideo" v-show="!videoSrc">
+            <div class="doglook">
+              <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#dog-hashiqi"></use>
+              </svg>
+            </div>
+            <div class="loading">
+              <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#dog-jiazai"></use>
+              </svg>
+            </div>
+            <div class="progressBox">
+              <x-progress :percent="precent" :show-cancel="false"></x-progress>
+              <p class="tips">正在生成静音文件,已完成{{precent}}%</p>
+            </div>
+          </div>
+      </div>
+    <div class="recordBox" @click="showCamera" v-show="!isUpload && !videoSrc">
       <div class="recordIcon">
         <div class="Dogrecording">
           <svg class="icon" aria-hidden="true">
@@ -34,87 +54,77 @@
 
 <script>
 import Vue from "vue";
-import myVideo from 'vue-video';
+import {mapGetters,mapState} from 'vuex';
+import {XProgress} from 'vux';
 import cameraActionsheet from "../../common/cameraActionsheet";
-console.log(myVideo);
+import videoPlayer from "../../common/videoPlay"
 export default {
-  created(){
-    console.log(window);
-    console.log(cordova);
+  created () {
+    this.$store.commit("SET_HEADER_RIGHT", this.rightOption);
+  },
+  mounted () {
+    //获取宽高
+    // this.screenW = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    // this.screenH = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+  },
+  destroyed(){
+    this.$store.commit("SET_HEADER_RIGHT", {
+                  option:{showMore: false},
+                  rightContent:"",
+                  action:function(){
+                    return ;
+                  }
+              });
   },
   data() {
     return {
       isShow: false,
+      videoUri:"",
+      isUpload:false,
+      precent: 0,
       menus: {
         video: "选择已有视频",
         takeVideo: "拍摄10s视频"
       },
-      videoCongfig: {
-        sources: [{
-            src: '',
-            type: 'video/mp4'
-           }],
-        options: {
-            autoplay: true,
-            volume: 0.6,
-            poster: ''
-          }
+      videoSrc:"",
+      videoOptions:{
+        playStatus:"autoplay",
+        muteStatus:true,
+        height:"280",
+        width:"100%"
+      },
+      rightOption:{
+           option:{showMore: false},
+           rightContent:"更改视频",
+           action:this.showCamera
       }
     };
+  },
+  computed: {
+    ...mapGetters({
+      user:"getUser"
+    }),
+    ...mapState({
+      config: state => state.config
+    })
   },
   methods: {
     showCamera() {
       this.isShow = true;
     },
     cameraSuccess(files) {
-      //相册
-     // /storage/emulated/0/tencent/MicroMsg/WeiXin/wx_camera_1499468951109.mp4
-     //录制
-    //  [MediaFile]
-    //   0: MediaFile
-    //   end: 0
-    //   fullPath: "file:///storage/emulated/0/DCIM/Video/V71123-171743.mp4"
-    //   lastModified: null
-    //   lastModifiedDate: 1511428674000
-    //   localURL: "cdvfile://localhost/sdcard/DCIM/Video/V71123-171743.mp4"
-    //   name: "V71123-171743.mp4"
-    //   size: 11421408
-    //   start: 0
-    //   type: "video/ext-mp4"
-    //   __proto__: utils.extend.F
-    //   constructor: (name, localURL, type, lastModifiedDate, size)
-    //   getFormatData: (successCallback, errorCallback)
-    //   __proto__: File
-    //   length: 1
-    //   __proto__: Array[0]
-      // 显示
-    let url = "";
+      let file = "";
       if(files[0].fullPath)
       {
-        url = files[0].localURL;
-        this.videoCongfig.sources[0].src = url;
+        file = files[0].fullPath;
       }
       else
       {
-        url = "file://"+files;
-        let that = this;
-        window.resolveLocalFileSystemURL(url,function(enter){
-          url = enter.toInternalURL();
-          that.videoCongfig.sources[0].src = url;
-        })
+        file = "file://"+files;
       }
-      // let options = {
-      //       successCallback: function() {
-      //         console.log("Video was closed without error.");
-      //       },
-      //       errorCallback: function(errMsg) {
-      //         console.log("Error! " + errMsg);
-      //       },
-      //       orientation: 'landscape',
-      //       shouldAutoClose: true,  // true(default)/false
-      //       controls: true // true(default)/false. Used to hide controls on fullscreen
-      //     };
-      //     window.plugins.streamingMedia.playVideo(videoUrl, options);
+      this.videoUri = file;
+      //上传视频
+      this.uploadVideo();
     },
     cameraError(message) {
        // 显示
@@ -123,11 +133,81 @@ export default {
         content: message,
         type:"warn"
       });
+    },
+    //上传视频
+    uploadVideo() {
+      this.isUpload = true;
+      //获取签名的id
+      let urlConfig = this.config.url;
+      let signatureUrl = urlConfig.base + urlConfig.imageSignature;
+      //七牛图床实现
+      let body = {
+          accessToken: this.user.accessToken,
+          type: "video",
+          cloud:"qiniu"
+        };    
+      let param = {
+        api: signatureUrl,
+        body: body,
+        cb: this.cbSignature
+      };
+      this.$store.dispatch("getSignature", param);
+    },
+    cbSignature(data){
+     if (data.success) {
+         let signature = data.obj.signature;
+         let imageURL = this.config.qiniu.upload;
+         let key = data.obj.key;
+
+         //七牛上传
+          let options = new FileUploadOptions();
+          options.fileKey = "file";
+          options.fileName = key;
+          options.mimeType = "video/mp4";
+          var params = {};
+          params.key = key;
+          params.token = signature;
+          options.params = params;
+
+          let ft = new FileTransfer();
+          ft.onprogress = this.onUploading;
+          ft.upload(this.videoUri, encodeURI(imageURL), this.cbuploadVideo, this.cbuploadVideoFail, options);
+      }
+      else
+      {
+        this.$vux.toast.show({
+            text:data.obj.errorMsg,
+            type:"warn"
+        })
+      }
+    },
+    onUploading(progressEvent){
+      if (progressEvent.lengthComputable) {
+          let that = this;
+          let loaded = progressEvent.loaded,
+            total = progressEvent.total;
+          that.$nextTick(() => {
+            that.precent = Math.round(loaded / total * 100);
+          });
+      }
+    },
+    cbuploadVideo(data){
+      data = JSON.parse(data.response);
+      
+      this.videoSrc = this.config.qiniu.fileUrl + "/" +data.key;
+      this.isUpload = false;
+      this.precent = 0;
+    },
+    cbuploadVideoFail(error){
+      console.log("upload error source " + error.source);
+      console.log("upload error target " + error.target);
     }
+
   },
   components: {
     cameraActionsheet,
-    myVideo
+    XProgress,
+    videoPlayer
   }
 };
 </script>
@@ -173,6 +253,48 @@ body{
 .recordDesc{
   font-size: 14px;
   color:#999;
+}
+
+.videoBox{
+  position: relative;
+  width:100%;
+  height: 280px;
+  .loadvideo{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction:column;
+      width: 100%;
+      height: 280px;
+      .doglook{
+        font-size: 80px;
+        width: 80px;
+        height: 100px;
+        padding: 0;
+        margin: 0;
+      }
+      .loading{
+        font-size: 30px;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        margin: 0;
+      }
+  }
+  .progressBox{
+    position: absolute;
+    background:rgba(244,244,244,0.65);
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    .tips{
+      width: 100%;
+      height: 25px;
+      font-size: 14px;
+      text-align: center;
+      line-height: 25px;
+    }
+  }
 }
 
 </style>
