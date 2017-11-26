@@ -26,7 +26,7 @@ const state = {
   config: {
     url: {
       //base: 'http://rapapi.org/mockjs/28885',
-      base: 'http://192.168.1.62/api.php',
+      base: 'http://api.lsiten.cn/api.php',
       videoList: '/api/videoList',
       like: '/api/like',
       coment: '/api/coment',
@@ -35,6 +35,8 @@ const state = {
       doLogin: '/api/user/verify',
       imageSignature: '/api/index/signature',
       update: '/api/user/update',
+      video: '/api/video/saveInfo',
+      saveCloudinaryInfo: '/api/video/saveCloudinaryInfo',
     },
     qiniu:{
       upload:"http://upload.qiniu.com/",
@@ -142,6 +144,21 @@ const actions = {
     commit
   }, params) {
     api.updateUser(params.api, params.body, params.cb);
+  },
+
+
+  //保存上传七牛视频的信息
+  saveVideoInfo({
+    commit
+  }, params) {
+    api.saveVideoInfo(params.api, params.body, params.cb);
+  },
+
+  //保存上传cloudinary视频的信息
+  addCloudinaryVideoInfo({
+    commit
+  }, params){
+    api.addCloudinaryVideoInfo(params.api, params.body, params.cb);
   }
 }
 

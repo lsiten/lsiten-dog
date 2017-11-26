@@ -290,6 +290,22 @@ module.exports = [
     "clobbers": [
       "window.FileTransfer"
     ]
+  },
+  {
+    "id": "cordova-plugin-media.MediaError",
+    "file": "plugins/cordova-plugin-media/www/MediaError.js",
+    "pluginId": "cordova-plugin-media",
+    "clobbers": [
+      "window.MediaError"
+    ]
+  },
+  {
+    "id": "cordova-plugin-media.Media",
+    "file": "plugins/cordova-plugin-media/www/Media.js",
+    "pluginId": "cordova-plugin-media",
+    "clobbers": [
+      "window.Media"
+    ]
   }
 ];
 module.exports.metadata = 
@@ -300,7 +316,8 @@ module.exports.metadata =
   "cordova-plugin-file": "5.0.0",
   "cordova-plugin-media-capture": "2.0.0",
   "com.hutchind.cordova.plugins.streamingmedia": "0.1.4",
-  "cordova-plugin-file-transfer": "1.7.0"
+  "cordova-plugin-file-transfer": "1.7.0",
+  "cordova-plugin-media": "4.0.0"
 };
 // BOTTOM OF METADATA
 });

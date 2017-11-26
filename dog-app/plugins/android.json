@@ -21,6 +21,9 @@
     },
     "cordova-plugin-file-transfer": {
       "PACKAGE_NAME": "cn.lsiten.dog"
+    },
+    "cordova-plugin-media": {
+      "PACKAGE_NAME": "cn.lsiten.dog"
     }
   },
   "dependent_plugins": {

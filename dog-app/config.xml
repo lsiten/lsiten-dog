@@ -44,4 +44,5 @@
     <plugin name="cordova-plugin-media-capture" spec="^2.0.0" />
     <plugin name="com.hutchind.cordova.plugins.streamingmedia" spec="~0.1.4" />
     <plugin name="cordova-plugin-file-transfer" spec="^1.7.0" />
+    <plugin name="cordova-plugin-media" spec="^4.0.0" />
 </widget>

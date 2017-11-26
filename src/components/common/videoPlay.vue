@@ -65,11 +65,21 @@ export default {
       {
         this.precent = 0;
       }
+      this.video.addEventListener('playing', ()=>{
+        this.$emit("playing");
+      })
+      this.video.addEventListener('waiting', ()=>{
+        this.$emit("waiting");
+      })
+      this.video.addEventListener('play', ()=>{
+        this.$emit("play");
+      })
       this.video.addEventListener('timeupdate', this.timeline)
       this.video.addEventListener('ended', (e) => {
             this.isPlay = false;
             this.isPause = false;
             this.precent = 100;
+            this.$emit("videoEnd");
         })
     },
     pauseVideo(){
@@ -78,6 +88,7 @@ export default {
     },
     timeline () {
         this.precent = Math.floor((this.video.currentTime / this.video.duration)*100)
+        this.$emit("process",this.precent);
     },
   }
 }

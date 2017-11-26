@@ -77,5 +77,14 @@ export default {
   //更新用户信息
   updateUser: (api, body, cb) => {
     fun_axios_post(api, body, cb)
+  },
+
+  //保存上传七牛视频的信息
+  saveVideoInfo: (api, body, cb) => {
+    fun_axios_post(api, body, cb)
+  },
+   //保存上传cloudinary视频的信息
+   addCloudinaryVideoInfo: (api, body, cb) => {
+    fun_axios_post(api, body, cb)
   }
 }

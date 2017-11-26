@@ -19,7 +19,6 @@
 <script>
 import { XHeader } from 'vux';
 import {mapState,mapMutations} from 'vuex';
-import changeVideo from "../pages/Record/changeVideo"
 export default {
   methods: {
     ...mapMutations(['updateDrawerVisibility']),
@@ -34,7 +33,6 @@ export default {
       }
     },
     clickMore(){
-      console.log(1);
       this.rightOptionsData.action();
     }
   },
@@ -69,8 +67,7 @@ export default {
     }
   },
   components:{
-    XHeader,
-    changeVideo
+    XHeader
   }
 }
 </script>
