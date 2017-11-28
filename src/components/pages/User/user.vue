@@ -297,7 +297,7 @@ export default {
           cb: this.cbuploadAvatar,
           uploading: this.onUploading
         };
-        this.$store.dispatch("uploadImage", param);
+        this.$store.dispatch("uploadFile", param);
       }
       else
       {

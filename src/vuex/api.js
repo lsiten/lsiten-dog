@@ -70,7 +70,7 @@ export default {
     fun_axios_post(api, body, cb)
   },
   //上传文件
-  uploadImage: (api, body, header, cb, uploading) => {
+  uploadFile: (api, body, header, cb, uploading) => {
     fun_axios_upload(api, body, header, cb, uploading)
   },
 
@@ -81,6 +81,10 @@ export default {
 
   //保存上传七牛视频的信息
   saveVideoInfo: (api, body, cb) => {
+    fun_axios_post(api, body, cb)
+  },
+  //合并视频音频，并保存更新video，记录audio
+  MergeVideo: (api, body, cb) => {
     fun_axios_post(api, body, cb)
   },
    //保存上传cloudinary视频的信息

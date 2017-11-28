@@ -68,6 +68,9 @@ export default {
       this.video.addEventListener('playing', ()=>{
         this.$emit("playing");
       })
+      this.video.addEventListener('pause', ()=>{
+        this.$emit("pause");
+      })
       this.video.addEventListener('waiting', ()=>{
         this.$emit("waiting");
       })
@@ -88,7 +91,7 @@ export default {
     },
     timeline () {
         this.precent = Math.floor((this.video.currentTime / this.video.duration)*100)
-        this.$emit("process",this.precent);
+        this.$emit("process",{precent:this.precent,currentTime:this.video.currentTime});
     },
   }
 }

@@ -37,6 +37,7 @@ const state = {
       update: '/api/user/update',
       video: '/api/video/saveInfo',
       saveCloudinaryInfo: '/api/video/saveCloudinaryInfo',
+      MergeVideo: '/api/video/MergeVideo',
     },
     qiniu:{
       upload:"http://upload.qiniu.com/",
@@ -133,11 +134,11 @@ const actions = {
     api.getSignature(params.api, params.body, params.cb)
   },
 
-  //获取图片signature
-  uploadImage({
+  //上传文件
+  uploadFile({
     commit
   }, params) {
-    api.uploadImage(params.api, params.body, params.header, params.cb, params.uploading)
+    api.uploadFile(params.api, params.body, params.header, params.cb, params.uploading)
   },
   //更新用户信息
   updateUser({
@@ -153,7 +154,12 @@ const actions = {
   }, params) {
     api.saveVideoInfo(params.api, params.body, params.cb);
   },
-
+//合并视频音频，并保存更新video，记录audio
+  MergeVideo({
+  commit
+  }, params){
+    api.MergeVideo(params.api, params.body, params.cb);
+  },
   //保存上传cloudinary视频的信息
   addCloudinaryVideoInfo({
     commit

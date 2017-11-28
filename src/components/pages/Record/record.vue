@@ -16,7 +16,11 @@
             v-on:process="onVideoProcess" 
             v-on:playing="onPlaying" 
             v-on:play="onPlay" 
+            v-on:pause="onPause" 
             v-on:waiting="onWaiting"></video-player>
+            <!-- <audio ref="audio" :src="audioData">
+               您的浏览器不支持 audio 标签。
+            </audio> -->
           <div class="progressBox" v-show="isRecording">
               <x-progress :percent="recordPrecent" :show-cancel="false"></x-progress>
               <p class="tips">正在录制声音{{recordPrecent}}%</p>
@@ -98,7 +102,7 @@ export default {
   created () {
     let that = this;
     this.cordova.on("deviceready", () => {
-      that.media = new Media(this.audioName,this.recordSuccess,this.recordError,this.recordStatus);
+      that.media = new Media(this.audioName,this.recordSuccess,this.recordError);
     })
   },
   mounted () {
@@ -119,7 +123,13 @@ export default {
     return {
       cordova:Vue.cordova,
       audioName:"videoRecord.wav",
+      audioData:"",
+      isUploadAudio:false,      
+      isMerge:false,
+      timestamp:"",
+      // audioData:"http://www.w3school.com.cn/i/song.mp3",
       media:null,
+      audio:null,
       recordPreload:3,
       recordText:"",
       prepareRecord:false,
@@ -136,7 +146,9 @@ export default {
         video: "选择已有视频",
         takeVideo: "拍摄10s视频"
       },
+      // videoSrc:"http://ozuexev9i.bkt.clouddn.com/07e1c6fa-289f-6c89-dc0b-c043d459fa17.mp4",
       videoSrc:"",
+      video_public_id:"",
       videoOptions:{
         playStatus:"autoplay",
         muteStatus:true,
@@ -162,10 +174,43 @@ export default {
   methods: {
     PlayPreview(){
       this.isPreview = true;
-      this.$refs.videoPlay.playVideo();
-      this.readReadFile();
+      this.$refs.videoPlay.video.mediaGroup = "previewMedia";
+      this.$refs.videoPlay.playVideo();  
     },
-    readReadFile(){
+    playAudio(){
+        this.audio = new Audio(this.audioData);
+        this.audio.mediaGroup = "previewMedia";
+        this.audio.play();
+        this.audio.addEventListener('playing', ()=>{
+          console.log("audio playing");
+        })
+        this.audio.addEventListener('pause', ()=>{
+          console.log("audio pause");
+        })
+        this.audio.addEventListener('waiting', ()=>{
+          console.log("audio waiting");
+        })
+        this.audio.addEventListener('play', ()=>{
+          console.log("audio play");
+          this.$refs.videoPlay.video.currentTime = 0;
+        })
+        this.audio.addEventListener('timeupdate', ()=>{
+          console.log("---audio timeupdate start-----");
+          if(!this.$refs.videoPlay.video.ended || this.$refs.videoPlay.video.paused)
+          {
+            this.$refs.videoPlay.video.currentTime = this.audio.currentTime;
+            this.$refs.videoPlay.video.play();
+            console.log("audio"+this.audio.currentTime);
+            console.log("video"+this.$refs.videoPlay.video.currentTime);
+          }
+          console.log("---audio timeupdate end-----");          
+        })
+        this.audio.addEventListener('ended', (e) => {
+            console.log("audio ended");
+            this.$refs.videoPlay.video.currentTime = this.$refs.videoPlay.video.duration-0.001;
+        })
+    },
+    readAudioFile(isUpload){
           let that = this;
           resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
               dirEntry.getFile(that.audioName,{},function(fileEntry){
@@ -173,14 +218,96 @@ export default {
                     //读取文件
                     let Reader = new FileReader();
                     Reader.onloadend = function(){
-                      console.log("Successful file read"+this.result);
-
+                      that.audioData = this.result;
+                      if(isUpload)
+                        that.uploadAudio();
                     }
                     Reader.readAsDataURL(file);
-    
                   })
               })
             })
+    },
+    uploadAudio(){
+      //获取签名的id
+      let urlConfig = this.config.url;
+      let signatureUrl = urlConfig.base + urlConfig.imageSignature;
+      this.timestamp = Date.now();
+      //cloudinary实现
+      let body = {
+          accessToken: this.user.accessToken,
+          timestamp:this.timestamp,
+          type: "audio",
+          cloud:"cloudinary"
+        }; 
+      let param = {
+        api: signatureUrl,
+        body: body,
+        cb: this.cbAudioSignature
+      };
+      this.$store.dispatch("getSignature", param);
+    },
+    cbAudioSignature(){
+      if (data.success) {
+         let signature = data.obj.signature;
+         let body = new FormData();
+         let imageURL = "";
+        //cloudinary上传
+          let folder = data.obj.folder;
+          let tags = data.obj.tags;
+          body.append("folder", folder);
+          body.append("signature", signature);
+          body.append("timestamp", this.timestamp);
+          body.append("tags", tags);
+          body.append("api_key", this.config.cloudinary.api_key);
+          body.append("resource_type", "audio");
+          body.append("file", this.audioData);
+          audioURL = this.config.cloudinary.apiBase + this.config.cloudinary.audio;
+          let param = {
+          api: audioURL,
+          body: body,
+          header: {
+            "Content-Type": "multipart/form-data"
+          },
+          cb: this.cbuploadAudeo,
+          uploading: this.onAudioUploading
+          };
+          this.$store.dispatch("uploadFile", param);
+      }
+    },
+    cbuploadAudeo(data){
+      if(data.public_id)
+      {
+        this.isUploadAudio = false;
+        this.isMerge = true;
+        //保存audio到数据库并且合并视频音频
+        let audio = {
+          public_id:data.public_id,
+          video_public_id:this.video_public_id
+        };
+        let MergeVideoURL = this.config.cloudinary.apiBase + this.config.url.MergeVideo;
+        let param = {
+          api: MergeVideoURL,
+          body: {
+            accessToken: this.user.accessToken,
+            audio:JSON.stringify(audio)
+          },
+          cb: this.cbMergeVideo,
+        };
+        this.$store.dispatch("MergeVideo", param);
+      }
+      
+    },
+    onAudioUploading(progressEvent){
+
+    },
+    cbMergeVideo(data){
+      this.isMerge = false;
+      if(data.success){
+        
+      }
+      else{
+
+      }
     },
     doPrepareRecord(){
       if(this.prepareRecord)
@@ -199,6 +326,7 @@ export default {
         that.isRecording = true;
         that.recordPrecent = 0;
         that.$nextTick(()=>{
+          videoPlay.video.currentTime = 0;
           videoPlay.playVideo();
           // Record audio
           this.media.startRecord();
@@ -213,40 +341,52 @@ export default {
         this.media.stopRecord();
         console.log("videoEnd");
       }
-      else if(this.isPreview)
-      {
-        this.media.stop();
-      }
+    },
+    onPause(){
+      console.log("onPause");
     },
     onPlay(){
-      this.media.seekTo(0);
+      console.log("play");
     },
     onWaiting(){
-      this.media.pause();
+      console.log("onWaiting");
+      if(this.isRecording)         
+        this.media.pauseRecord();
     },
     onPlaying(){
-      if(!this.isRecording){
-        this.media.play();
-        this.media.setVolume("1.0");
+      console.log("onPlaying");      
+      if(this.isRecording){
+        this.media.resumeRecord();
       }
     },
-    onVideoProcess(present){
-      this.recordPrecent = present;
+    onVideoProcess(data){
+      console.log("onVideoProcess");   
+      if(this.isRecording){
+        this.recordPrecent = data.precent;
+      }
+      else if(this.isPreview){
+        console.log("---video timeupdate start-----");
+        console.log("paused:"+this.audio.paused);
+        if(!this.audio.ended || this.audio.paused)
+          {
+            this.audio.currentTime = data.currentTime;
+            this.audio.play();
+            console.log("audio"+this.audio.currentTime);
+            console.log("video"+data.currentTime);
+          }
+        console.log("---video timeupdate end-----");
+      }         
     },
     recordSuccess(){
       console.log("start recording");
+      if(this.recorded)
+      {
+        this.isUploadAudio = true;
+        this.readAudioFile(true);
+      }
     },
     recordError(err){
       console.log("Error recording"+err);
-    },
-    recordStatus(option){
-      if(Media.MEDIA_RUNNING==option)
-      {
-        this.media.getCurrentAmplitude(function(sec){
-          console.log(sec)
-        });
-        console.log(this.media.getDuration());
-      }
     },
     changeVideo(){
       this.isChangeVideo = true;
@@ -370,7 +510,9 @@ export default {
               qiniu_key: key,
               src:fileSrc
             },
-            cb:(data)=>{ console.log(data)}
+            cb:(data)=>{ 
+              this.video_public_id = data.obj.public_id
+            }
           };
          this.$store.dispatch("addCloudinaryVideoInfo",params);
       }
@@ -475,7 +617,7 @@ body{
   .progressBox{
     position: absolute;
     background:#EBEBEB;
-    bottom: -28px;
+    bottom: -26px;
     left: 0;
     width: 100%;
     .tips{

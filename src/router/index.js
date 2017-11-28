@@ -13,6 +13,7 @@ import videoDetail from '@/components/pages/Home/videoDetail'
 
 // 录制页相关页面
 import record from '@/components/pages/Record/record'
+import audio from '@/components/pages/Record/audio'
 
 // 用户相关页面
 import user from '@/components/pages/User/user'
@@ -29,6 +30,11 @@ export default new Router({
       path:'/user/login',
       name:'login',
       component: login
+    },
+    {
+      path:'/audio',
+      name:'audio',
+      component: audio
     },
     {
       path: '/',
