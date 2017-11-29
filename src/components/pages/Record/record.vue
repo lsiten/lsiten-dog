@@ -6,6 +6,18 @@
  */
 <template>
   <div class="record">
+    <div class="loading-box" v-show="isMerge || isUploadAudio">
+      <div class="loading-box-content">
+          <div class="loading-box-icon">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#dog-jiazai"></use>
+                </svg>
+          </div>
+          <div class="loading-box-text">
+                {{loadingTips}}
+          </div>
+      </div>
+    </div>
     <div class="videoBox" v-show="isUpload || videoSrc">
         <div class="videoRecoding" v-show="videoSrc && !isChangeVideo">
           <video-player 
@@ -17,16 +29,20 @@
             v-on:playing="onPlaying" 
             v-on:play="onPlay" 
             v-on:pause="onPause" 
-            v-on:waiting="onWaiting"></video-player>
-            <!-- <audio ref="audio" :src="audioData">
-               您的浏览器不支持 audio 标签。
-            </audio> -->
+            v-on:waiting="onWaiting" v-show="!isPreview"></video-player>
+            <video-player 
+            ref="PrevideoPlay" 
+            :src="PrevideoSrc"  
+            :options="PrevideoOptions" v-show="isPreview"></video-player>
           <div class="progressBox" v-show="isRecording">
               <x-progress :percent="recordPrecent" :show-cancel="false"></x-progress>
               <p class="tips">正在录制声音{{recordPrecent}}%</p>
           </div>
+          <div class="progressBox" v-show="disableRecord && !isRecording">
+              <p class="tips">正在初始化录音设备...</p>
+          </div>
           <div class="recording-btn-box">
-              <div class="recording-btn-icon" :style="isRecording?{background:'#c7c0bf'}:{}"  @click="doPrepareRecord">
+              <div class="recording-btn-icon" :style="disableRecord?{background:'#c7c0bf'}:{}"  @click="doPrepareRecord">
                 <svg class="icon" aria-hidden="true" v-show="!prepareRecord && recorded">
                   <use xlink:href="#dog-zhongxin"></use>
                 </svg>
@@ -41,7 +57,7 @@
                 </div>
               </div>
           </div>
-          <div class="preview-video-box" v-show="!prepareRecord && recorded">
+          <div class="preview-video-box" v-show="isPreview">
               <div class="preview-video"  @click="PlayPreview">
                  <svg class="icon" aria-hidden="true" >
                    <use xlink:href="#dog-yulan"></use>
@@ -126,12 +142,12 @@ export default {
       audioData:"",
       isUploadAudio:false,      
       isMerge:false,
+      loadingTips:"",
       timestamp:"",
-      // audioData:"http://www.w3school.com.cn/i/song.mp3",
       media:null,
-      audio:null,
       recordPreload:3,
       recordText:"",
+      disableRecord:true,
       prepareRecord:false,
       isRecording:false,
       recorded:false,
@@ -146,14 +162,22 @@ export default {
         video: "选择已有视频",
         takeVideo: "拍摄10s视频"
       },
-      // videoSrc:"http://ozuexev9i.bkt.clouddn.com/07e1c6fa-289f-6c89-dc0b-c043d459fa17.mp4",
       videoSrc:"",
+      PrevideoSrc:"",
       video_public_id:"",
       videoOptions:{
         playStatus:"autoplay",
         muteStatus:true,
         height:"280",
-        width:"100%"
+        width:"100%",
+        poster:""
+      },
+      PrevideoOptions:{
+        playStatus:"",
+        muteStatus:false,
+        height:"280",
+        width:"100%",
+        poster:""
       },
       isChangeVideo:false,
       rightOption:{
@@ -174,41 +198,12 @@ export default {
   methods: {
     PlayPreview(){
       this.isPreview = true;
-      this.$refs.videoPlay.video.mediaGroup = "previewMedia";
-      this.$refs.videoPlay.playVideo();  
-    },
-    playAudio(){
-        this.audio = new Audio(this.audioData);
-        this.audio.mediaGroup = "previewMedia";
-        this.audio.play();
-        this.audio.addEventListener('playing', ()=>{
-          console.log("audio playing");
-        })
-        this.audio.addEventListener('pause', ()=>{
-          console.log("audio pause");
-        })
-        this.audio.addEventListener('waiting', ()=>{
-          console.log("audio waiting");
-        })
-        this.audio.addEventListener('play', ()=>{
-          console.log("audio play");
-          this.$refs.videoPlay.video.currentTime = 0;
-        })
-        this.audio.addEventListener('timeupdate', ()=>{
-          console.log("---audio timeupdate start-----");
-          if(!this.$refs.videoPlay.video.ended || this.$refs.videoPlay.video.paused)
-          {
-            this.$refs.videoPlay.video.currentTime = this.audio.currentTime;
-            this.$refs.videoPlay.video.play();
-            console.log("audio"+this.audio.currentTime);
-            console.log("video"+this.$refs.videoPlay.video.currentTime);
-          }
-          console.log("---audio timeupdate end-----");          
-        })
-        this.audio.addEventListener('ended', (e) => {
-            console.log("audio ended");
-            this.$refs.videoPlay.video.currentTime = this.$refs.videoPlay.video.duration-0.001;
-        })
+      let that = this;
+       that.$nextTick(()=>{
+         let video = that.$refs.PrevideoPlay;
+         video.video.currentTime = 0;
+         video.playVideo();  
+       })
     },
     readAudioFile(isUpload){
           let that = this;
@@ -246,20 +241,22 @@ export default {
       };
       this.$store.dispatch("getSignature", param);
     },
-    cbAudioSignature(){
+    cbAudioSignature(data){
       if (data.success) {
          let signature = data.obj.signature;
          let body = new FormData();
-         let imageURL = "";
+         let audioURL = "";
         //cloudinary上传
           let folder = data.obj.folder;
           let tags = data.obj.tags;
+          let key = data.obj.key;
           body.append("folder", folder);
           body.append("signature", signature);
           body.append("timestamp", this.timestamp);
           body.append("tags", tags);
+          body.append("public_id", key);
           body.append("api_key", this.config.cloudinary.api_key);
-          body.append("resource_type", "audio");
+          body.append("resource_type", "video");
           body.append("file", this.audioData);
           audioURL = this.config.cloudinary.apiBase + this.config.cloudinary.audio;
           let param = {
@@ -279,12 +276,21 @@ export default {
       {
         this.isUploadAudio = false;
         this.isMerge = true;
+        this.loadingTips = "正在合并视频音频...";
         //保存audio到数据库并且合并视频音频
+        if(!this.video_public_id)
+        {
+          this.recorded = false;
+          this.$vux.toast.show({
+              text:"视频合并失败，请重新录音",
+              type:"warn"
+          })
+        }
         let audio = {
           public_id:data.public_id,
           video_public_id:this.video_public_id
         };
-        let MergeVideoURL = this.config.cloudinary.apiBase + this.config.url.MergeVideo;
+        let MergeVideoURL = this.config.url.base + this.config.url.MergeVideo;
         let param = {
           api: MergeVideoURL,
           body: {
@@ -295,23 +301,39 @@ export default {
         };
         this.$store.dispatch("MergeVideo", param);
       }
+      else{
+        this.recorded = false;
+        this.$vux.toast.show({
+            text:"录音上传失败，请重新录音",
+            type:"warn"
+        })
+      }
       
     },
     onAudioUploading(progressEvent){
-
+      return ;
     },
     cbMergeVideo(data){
       this.isMerge = false;
+      this.loadingTips = "";
       if(data.success){
-        
+        this.PrevideoSrc = this.config.qiniu.fileUrl + "/" +data.obj.video_key;
+        this.PrevideoOptions.poster = this.config.qiniu.fileUrl + "/" +data.obj.poster_key;
+        this.isPreview = true;
       }
       else{
-
+        this.recorded = false;
+        this.$vux.toast.show({
+            text:data.obj.errorMsg,
+            type:"warn"
+        })
       }
     },
     doPrepareRecord(){
       if(this.prepareRecord)
        return;
+      if(this.disableRecord)
+        return;
       this.prepareRecord = true;
       this.recorded = false;
     },
@@ -319,13 +341,15 @@ export default {
       this.recordText = "GO";
       this.recordPreload = 3;
       let that = this;
-      let videoPlay = this.$refs.videoPlay;
       setTimeout(() => {
         that.recordText = "";
         that.prepareRecord = false;
         that.isRecording = true;
+        that.disableRecord = true;
         that.recordPrecent = 0;
+        that.isPreview = false;
         that.$nextTick(()=>{
+          let videoPlay = that.$refs.videoPlay;
           videoPlay.video.currentTime = 0;
           videoPlay.playVideo();
           // Record audio
@@ -334,6 +358,11 @@ export default {
       }, 1000);
     },
     endRecord(){
+      if(this.disableRecord)
+      {
+        //播放完视频就允许开始录制
+        this.disableRecord = false;
+      }
       if(this.isRecording){
         this.isRecording = false;
         this.recordPrecent = 0;
@@ -363,33 +392,28 @@ export default {
       console.log("onVideoProcess");   
       if(this.isRecording){
         this.recordPrecent = data.precent;
-      }
-      else if(this.isPreview){
-        console.log("---video timeupdate start-----");
-        console.log("paused:"+this.audio.paused);
-        if(!this.audio.ended || this.audio.paused)
-          {
-            this.audio.currentTime = data.currentTime;
-            this.audio.play();
-            console.log("audio"+this.audio.currentTime);
-            console.log("video"+data.currentTime);
-          }
-        console.log("---video timeupdate end-----");
-      }         
+      }    
     },
     recordSuccess(){
       console.log("start recording");
       if(this.recorded)
       {
         this.isUploadAudio = true;
+        this.loadingTips="正在上传视频...";
         this.readAudioFile(true);
       }
     },
     recordError(err){
       console.log("Error recording"+err);
     },
-    changeVideo(){
+    initData(){
       this.isChangeVideo = true;
+      this.disableRecord = true;
+      this.isMerge = false;
+      this.isUploadAudio = false;
+    },
+    changeVideo(){
+      this.initData();
       this.showCamera();
     },
     showCamera() {
@@ -413,11 +437,7 @@ export default {
     },
     cameraError(message) {
        // 显示
-      this.$vux.alert.show({
-        title: "提示",
-        content: message,
-        type:"warn"
-      });
+       console.log(message);
     },
     //上传视频
     uploadVideo() {
@@ -510,8 +530,8 @@ export default {
               qiniu_key: key,
               src:fileSrc
             },
-            cb:(data)=>{ 
-              this.video_public_id = data.obj.public_id
+            cb:(data)=>{
+              this.video_public_id = data.obj.video.public_id;
             }
           };
          this.$store.dispatch("addCloudinaryVideoInfo",params);
@@ -539,7 +559,9 @@ export default {
 body{
   background-color:#fff;
 }
-
+.record{
+  position: relative;
+}
 .recordBox{
   display: flex;
   margin: 85px 30px 30px 30px;
@@ -674,5 +696,23 @@ body{
   font-weight: bold;
   background: #ee735c;
   text-align: center;
+}
+
+.loading-box{
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 310px;
+  background: rgba(0,0,0,0.85);
+  z-index: 99;
+  top: 0;
+  color: #fff;
+  left: 0;
+  .loading-box-icon{
+    text-align: center;
+    font-size: 50px;
+  }
 }
 </style>

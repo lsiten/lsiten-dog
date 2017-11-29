@@ -51,7 +51,7 @@ const state = {
       apiBase: 'https://api.cloudinary.com/v1_1/lsiten',
       image: '/image/upload',
       video: '/video/upload',
-      audio: '/raw/upload',
+      audio: '/video/upload',
 
     }
   },

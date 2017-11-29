@@ -279,10 +279,12 @@ export default {
           //cloudinary上传
           let folder = data.obj.folder;
           let tags = data.obj.tags;
+          let key = data.obj.key;
           body.append("folder", folder);
           body.append("signature", signature);
           body.append("timestamp", this.timestamp);
           body.append("tags", tags);
+          body.append("public_id", key);
           body.append("api_key", this.config.cloudinary.api_key);
           body.append("resource_type", "image");
           body.append("file", this.avatarData);
