@@ -6,7 +6,8 @@
  */
 <template>
   <div class="index">
-      <scroller 
+      <scroller
+            height="-40"
             lock-x 
             use-pulldown
             use-pullup
@@ -16,11 +17,11 @@
             @on-pullup-loading = "onScrollBottom"
             ref="scrollerBottom">
             <div>
-               <div class="card-list" v-for="item in videoLists" v-bind:key="item._id">
+               <div class="card-list" v-for="item in videoLists" v-bind:key="item.id">
                     <video-row :item="item"></video-row>
                </div>
             </div>
-           <load-more tip="loading"></load-more>
+           <load-more tip="loading" v-show="videoMore && onFetching"></load-more>
         </scroller>
   </div>
 </template>
@@ -28,85 +29,38 @@
 <script>
 import { LoadMore, Scroller } from "vux";
 import videoRow from "./videoRow"
-import { mapState } from "vuex";
-import axios from "axios";
-import Mock from "mockjs";
-import queryString from "query-string";
-import store from "store";
+import { mapState,mapGetters } from "vuex";
 export default {
   created() {
-    this._initStore();
-    this._getVideoLists(0,'down');
+    this._getVideoLists();
   },
   mounted() {
     this.$nextTick(() => {
           this.$refs.scrollerBottom.reset({top : 0});
           this.$refs.scrollerBottom.donePulldown();
-        });
+          this.onFetching = false;
+     });
   },
   methods: {
-    //初始化本地存储
-    _initStore() {
-      store.set("nextPage", 1);
-      store.set("total", 0);
-    },
-    _getVideoLists(page, type) {
+    _getVideoLists() {
       //设置正在获取
       this.onFetching = true;
-      //获取视频数据列表
-      let url = this.config.url.base + this.config.url.videoList;
-      axios
-        .get(
-          url +
-            "?" +
-            queryString.stringify({ accessToken: "11dsdf", page: page })
-        )
-        .then(response => {
-          response = Mock.mock(response.data);
-          if (response.success) {
-            if ("up" == type) {
-              this.videoLists = this.videoLists.concat(response.data);
-            }
-
-            if ("down" == type) {
-              this.videoLists = response.data;
-            }
-
-            store.set("total", response.total);
-            store.set("nextPage", ++page);
-            store.set("videoLists", this.videoLists);
-          }
-          this.onFetching = false;
-          
-        })
-        .catch(error => {
-          this.onFetching = false;
-          let videoLists = store.get("videoLists");
-          this.videoLists = videoLists ? videoLists : [];
-          console.log(error);
-        });
-    },
-    //判断是否有更多数据
-    _hasMore() {
-      return this.videoLists.length < store.get("total");
+      //获取视频列表
+      this.$store.dispatch("getVideolists");
     },
     //上拉加载
     onScrollBottom() {
-      if (!this._hasMore()) {
-        this.$refs.scrollerBottom.reset();
-        this.$refs.scrollerBottom.disablePullup();
-        return;
+      if(!this.videoMore)
+      {
+          this.$refs.scrollerBottom.reset();
+          this.$refs.scrollerBottom.donePulldown();
       }
       if (this.onFetching) return;
-      let nextPage = store.get("nextPage");
-      if (!nextPage) {
-        nextPage = 1;
-        this._initStore();
-      }
-      this._getVideoLists(nextPage,'up');
+      this._getVideoLists();
       this.$nextTick(() => {
         this.$refs.scrollerBottom.reset();
         this.$refs.scrollerBottom.donePullup();
+        this.onFetching = false;
       });
     },
     //下拉刷新
@@ -114,18 +68,18 @@ export default {
       if (this.onFetching) {
         return;
       } else {
-        this._initStore();
-        this._getVideoLists(0,'down');
+        //获取视频列表
+        this.$store.dispatch("getVideolistsFresh");
         this.$nextTick(() => {
           this.$refs.scrollerBottom.reset({top : 0});
           this.$refs.scrollerBottom.donePulldown();
+          this.onFetching = false;
         });
       }
     }
   },
   data() {
     return {
-      videoLists: [],
       onFetching: false,
       pulldownConfig: {
         content: "下拉刷新",
@@ -143,6 +97,10 @@ export default {
   computed: {
     ...mapState({
       config: state => state.config
+    }),
+    ...mapGetters({
+      videoLists:"getVideoList",
+      videoMore:"getVideoMore"
     })
   },
   components: {

@@ -23,6 +23,11 @@ export default {
   methods: {
     ...mapMutations(['updateDrawerVisibility']),
     clickBack(){
+      if(this.backurl)
+      {
+        this.$router.replace(this.backurl);
+        return;
+      }
       let from = this.route.from;
       if (/\/http/.test(from.path)) {
         let url = from.path.split('http')[1];
@@ -43,13 +48,15 @@ export default {
       direction: state => state.direction,
       drawerVisibility: state => state.drawerVisibility,
       websiteTitle: state => state.websiteTitle,
-      rightOptionsData: state => state.rightOptions
+      rightOptionsData: state => state.rightOptions,
+      backurl: state => state.backurl
     }),
     websiteTitle () {
       if (this.route.path === '/') return '首页'
       if (this.route.path === '/record') return '理解狗狗，从配音开始'
       if (this.route.path === '/user') return '我的'
       if (this.route.name === 'videoDetail') return '视频详情'
+      if (this.route.name === 'myvideo') return '我的视频'
       if (this.route.name === 'error') return '页面错误'
       return '首页'
     },

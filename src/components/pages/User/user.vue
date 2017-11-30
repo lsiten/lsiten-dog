@@ -42,29 +42,20 @@
       <card>
          <div slot="content" class="card-demo-flex card-demo-content01">
            <div class="vux-1px-r">
-             <span>1130</span>
+             <span>{{user.score||0}}</span>
             <br/>
             我的积分
           </div>
           <div class="vux-1px-r">
-            <span>15</span>
+            <span>{{user.videonum||0}}</span>
              <br/>
-             我的经验
-          </div>
-          <div class="vux-1px-r">
-            <span>0</span>
-            <br/>
-            我的卡券
+             我的视频
           </div>
          </div>
       </card>
 
       <group>
-      <cell title="cell" value="hello" is-link></cell>
-      <cell is-link>
-        cell-box long long long long long long long
-      </cell>
-      <cell title="cell" value="hello" is-link></cell>
+      <cell title="我的视频" link="/user/myvideo" is-link></cell>
       <cell-box>
           <x-button type="warn"  @click.native="logout">退出登录</x-button>          
       </cell-box>

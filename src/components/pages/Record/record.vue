@@ -29,11 +29,7 @@
             v-on:playing="onPlaying" 
             v-on:play="onPlay" 
             v-on:pause="onPause" 
-            v-on:waiting="onWaiting" v-show="!isPreview"></video-player>
-            <video-player 
-            ref="PrevideoPlay" 
-            :src="PrevideoSrc"  
-            :options="PrevideoOptions" v-show="isPreview"></video-player>
+            v-on:waiting="onWaiting"></video-player>
           <div class="progressBox" v-show="isRecording">
               <x-progress :percent="recordPrecent" :show-cancel="false"></x-progress>
               <p class="tips">正在录制声音{{recordPrecent}}%</p>
@@ -83,6 +79,9 @@
             </div>
           </div>
       </div>
+      <div class="next-step" v-show="isPreview">
+              <x-button plain style="border-radius:30px;" class="custom-primary-button" @click.native="dopublishModel">下一步</x-button>
+      </div>
     <div class="recordBox" @click="showCamera" v-show="!isUpload && !videoSrc">
       <div class="recordIcon">
         <div class="Dogrecording">
@@ -105,16 +104,35 @@
      @input="val=>{isShow=val}"
      v-on:success = "cameraSuccess"
      v-on:error = "cameraError" ></camera-actionsheet>
+     <!-- 弹出评论页 -->
+      <div v-transfer-dom class="publish-from">
+        <popup v-model="publishModel" position="bottom" height="100%">
+            <div class="top">
+                <span @click="_closePublishModel" class="vux-close" style="color:red;"></span>
+            </div>
+            <div class="dialog-PublishArea">
+              <group>
+                <x-textarea style="margin-top:0" placeholder="给狗狗一句宣言吧" v-model="videoTitle" :max="200" :show-counter="true"></x-textarea>
+              </group>
+              <div class="btn-sub">
+              <x-button type="primary"  @click.native="publish" :show-loading="isPublish">提交</x-button>
+              </div>
+            </div>
+        </popup>
+      </div>
   </div>
 </template>
 
 <script>
 import Vue from "vue";
 import {mapGetters,mapState} from 'vuex';
-import {XProgress,Countdown} from 'vux';
+import {XProgress,Countdown,XButton,Popup,TransferDom, XTextarea, Group} from 'vux';
 import cameraActionsheet from "../../common/cameraActionsheet";
 import videoPlayer from "../../common/videoPlay";
 export default {
+  directives: {
+    TransferDom
+  },
   created () {
     let that = this;
     this.cordova.on("deviceready", () => {
@@ -138,6 +156,10 @@ export default {
   data() {
     return {
       cordova:Vue.cordova,
+      publishModel:false,
+      isPublish:false,
+      videoTitle:"",
+
       audioName:"videoRecord.wav",
       audioData:"",
       isUploadAudio:false,      
@@ -163,18 +185,11 @@ export default {
         takeVideo: "拍摄10s视频"
       },
       videoSrc:"",
-      PrevideoSrc:"",
       video_public_id:"",
+      qiniu_key:"",
       videoOptions:{
         playStatus:"autoplay",
         muteStatus:true,
-        height:"280",
-        width:"100%",
-        poster:""
-      },
-      PrevideoOptions:{
-        playStatus:"",
-        muteStatus:false,
         height:"280",
         width:"100%",
         poster:""
@@ -196,13 +211,72 @@ export default {
     })
   },
   methods: {
+    dopublishModel(){
+      this.publishModel = true;
+    },
+    publish(){
+      if(this.isPublish)
+      return ;
+      this.isPublish = true;
+      let title = this.videoTitle;
+      if(!title)
+      {
+        this.isPublish = false;
+        this.$vux.toast.show({
+          text:"狗狗还没有宣言哟！",
+          type:"warn"
+        });
+        return ;
+      }
+      let body = {
+        title: title,
+        qiniu_key: this.qiniu_key,
+        accessToken:this.user.accessToken
+      }
+      let creationUrl = this.config.url.base + this.config.url.creation;
+      let params = {
+        api:creationUrl,
+        body:body,
+        cb:this.cbCreation
+      };
+      this.$store.dispatch("creation",params);
+    },
+    cbCreation(data){
+      this.isPublish = false;
+      if(data.success)
+      {
+        let that = this;
+        this.videoTitle = "";
+        this.initData();
+        this._closePublishModel();
+        this.$vux.toast.show({
+            text:"视频创建成功",
+            type:"success",
+            onHide:()=>{
+                that.$router.replace({ name: "index" });
+            }
+        });
+      }
+      else
+      {
+        this.$vux.toast.show({
+          text:data.obj.errorMsg,
+          type:"warn"
+        });
+      }
+    },
+    _closePublishModel(){
+      this.publishModel = false;
+    },
     PlayPreview(){
       this.isPreview = true;
       let that = this;
        that.$nextTick(()=>{
-         let video = that.$refs.PrevideoPlay;
-         video.video.currentTime = 0;
-         video.playVideo();  
+      let video = that.$refs.videoPlay;
+        console.log(video.video.duration);
+        video.reloadvideo();
+        video.video.autoplay=true;
+         video.playVideo(); 
        })
     },
     readAudioFile(isUpload){
@@ -288,7 +362,8 @@ export default {
         }
         let audio = {
           public_id:data.public_id,
-          video_public_id:this.video_public_id
+          video_public_id:this.video_public_id,
+          qiniu_key:this.qiniu_key
         };
         let MergeVideoURL = this.config.url.base + this.config.url.MergeVideo;
         let param = {
@@ -299,7 +374,16 @@ export default {
           },
           cb: this.cbMergeVideo,
         };
-        this.$store.dispatch("MergeVideo", param);
+        try {
+          this.$store.dispatch("MergeVideo", param);
+        } catch (error) {
+          console.log(error);
+          this.recorded = false;
+          this.$vux.toast.show({
+              text:"录音上传失败，请重新录音",
+              type:"warn"
+          })
+        }
       }
       else{
         this.recorded = false;
@@ -317,8 +401,17 @@ export default {
       this.isMerge = false;
       this.loadingTips = "";
       if(data.success){
-        this.PrevideoSrc = this.config.qiniu.fileUrl + "/" +data.obj.video_key;
-        this.PrevideoOptions.poster = this.config.qiniu.fileUrl + "/" +data.obj.poster_key;
+        this.videoSrc = this.config.qiniu.fileUrl + "/" +data.obj.video_key;
+        this.videoOptions = {
+                playStatus:"false",
+                muteStatus:false,
+                height:"280",
+                width:"100%",
+                poster: this.config.qiniu.fileUrl + "/" +data.obj.poster_key
+        }
+        this.$nextTick(()=>{
+          this.$refs.videoPlay.reloadvideo();
+        });
         this.isPreview = true;
       }
       else{
@@ -348,9 +441,9 @@ export default {
         that.disableRecord = true;
         that.recordPrecent = 0;
         that.isPreview = false;
+        that.videoOptions.muteStatus = true;
         that.$nextTick(()=>{
           let videoPlay = that.$refs.videoPlay;
-          videoPlay.video.currentTime = 0;
           videoPlay.playVideo();
           // Record audio
           this.media.startRecord();
@@ -390,6 +483,7 @@ export default {
     },
     onVideoProcess(data){
       console.log("onVideoProcess");   
+      console.log(data);   
       if(this.isRecording){
         this.recordPrecent = data.precent;
       }    
@@ -399,7 +493,7 @@ export default {
       if(this.recorded)
       {
         this.isUploadAudio = true;
-        this.loadingTips="正在上传视频...";
+        this.loadingTips="正在上传音频...";
         this.readAudioFile(true);
       }
     },
@@ -407,19 +501,37 @@ export default {
       console.log("Error recording"+err);
     },
     initData(){
-      this.isChangeVideo = true;
+      this.audioData = "";
+      this.recorded = false;
+      this.recordPrecent =  0;
+      this.isPreview = false;
       this.disableRecord = true;
+      this.prepareRecord = false;
+      this.isRecording = false;
+      this.isPublish = false;
       this.isMerge = false;
       this.isUploadAudio = false;
+      this.videoSrc = "";
+      this.videoSrc= "";
+      this.video_public_id= "";
+      this.qiniu_key= "";
+      this.videoOptions = {
+            playStatus:"autoplay",
+            muteStatus:true,
+            height:"280",
+            width:"100%",
+            poster:""
+          };
     },
     changeVideo(){
-      this.initData();
+      this.isChangeVideo = true;
       this.showCamera();
     },
     showCamera() {
       this.isShow = true;
     },
     cameraSuccess(files) {
+      this.initData();
       let file = "";
       if(files[0].fullPath)
       {
@@ -522,12 +634,12 @@ export default {
     cbSaveVideoinfo(data){
       if(data.success){
         let fileSrc = data.obj.video.src;
-        let key = data.obj.video.qiniu_key;
+        this.qiniu_key = data.obj.video.qiniu_key;
          let params = {
             api:this.config.url.base + this.config.url.saveCloudinaryInfo,
             body:{
               accessToken: this.user.accessToken,
-              qiniu_key: key,
+              qiniu_key: this.qiniu_key,
               src:fileSrc
             },
             cb:(data)=>{
@@ -537,18 +649,22 @@ export default {
          this.$store.dispatch("addCloudinaryVideoInfo",params);
       }
     }
-
   },
   components: {
     cameraActionsheet,
     XProgress,
     videoPlayer,
-    Countdown
+    Countdown,
+    XButton,
+    Popup,
+    XTextarea,
+    Group
   }
 };
 </script>
 
 <style lang="less">
+@import "~vux/src/styles/close.less";
 .icon {
   width: 1em;
   height: 1em;
@@ -715,4 +831,32 @@ body{
     font-size: 50px;
   }
 }
+
+.custom-primary-button{
+  border-radius: 30px!important;
+  border-color: #ee735c!important;
+  color: #ee735c!important;
+  &:active {
+    border-color: #ee735c!important;
+    color: #ee735c!important;
+    background-color: transparent;
+  }
+}
+.next-step{
+  margin-top:40px;
+}
+.publish-from {
+  .top {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+  }
+  .dialog-PublishArea {
+    background-color: #fff;
+    margin-top: -1.4em;
+  }
+  .btn-sub {
+    margin-top: 15px;
+  }
+  }
 </style>

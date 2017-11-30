@@ -10,8 +10,7 @@ let fun_axios_get = (api, cb) => {
   axios.get(api)
     .then((res) => {
       if (res.status >= 200 && res.status < 300) {
-        let data = Mock.mock(res.data);
-        cb(data);
+        cb(res.data);
       }
     })
     .catch((err) => {
@@ -89,6 +88,29 @@ export default {
   },
    //保存上传cloudinary视频的信息
    addCloudinaryVideoInfo: (api, body, cb) => {
+    fun_axios_post(api, body, cb)
+  },
+  //保存视频创意的信息
+  creation: (api, body, cb) => {
+    fun_axios_post(api, body, cb)
+  },
+
+  //获取视频数据
+  getVideoList(api,cb){
+    fun_axios_get(api,cb);
+  },
+
+  //点赞功能
+  dolike(api,cb){
+    fun_axios_get(api,cb);
+  },
+
+  getComentLists(api,cb){
+    fun_axios_get(api,cb);
+  },
+
+  //提交评论
+  subComment(api, body, cb){
     fun_axios_post(api, body, cb)
   }
 }

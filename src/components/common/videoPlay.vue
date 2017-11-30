@@ -1,7 +1,7 @@
 <template>
   <div>      
     <div class="video-play-box">
-        <video ref="myvideo" :src="src" :muted="options.muteStatus" :poster="options.poster" :autoplay="options.playStatus" :height="options.height" v-bind:style={width:options.width} preload="auto" @click="pauseVideo">
+        <video ref="myvideo" :src="src" :muted="options.muteStatus" :poster="options.poster" :height="options.height" v-bind:style={width:options.width} preload="auto" @click="pauseVideo">
                your browser does not support the video tag
         </video>
         <div class="video-play-button" v-show="isLoaded && !isPlay">
@@ -39,11 +39,29 @@ export default {
     this.video = this.$refs.myvideo;
     let that = this;
     this.video.addEventListener('canplaythrough',function(){
-        that.isLoaded = true;
         if(that.options.playStatus && "autoplay"==that.options.playStatus){
             that.playVideo();
         }
     });
+    this.video.addEventListener('canplay', ()=>{
+         this.isLoaded = true;
+      })
+    this.video.addEventListener('playing', ()=>{
+      if(!this.duration){
+          this.duration = this.video.duration;
+        }
+      this.$emit("playing");
+    })
+    this.video.addEventListener('pause', ()=>{
+      this.$emit("pause");
+    })
+    this.video.addEventListener('waiting', ()=>{
+      this.$emit("waiting");
+    })
+    
+    this.video.addEventListener('play', ()=>{
+      this.$emit("play");
+    })
   },
   data(){
     return {
@@ -52,10 +70,14 @@ export default {
       isPlay:false,
       isPause:false,
       precent: 0,
+      duration: 0,
       isLoaded:false
     }
   },
   methods: {
+    reloadvideo(){
+      this.video.load();
+    },
       //播放视频
     playVideo(){
       this.isPlay = true;
@@ -64,19 +86,13 @@ export default {
       if(!this.isPlay)
       {
         this.precent = 0;
+        this.video.currentTime = 0;
       }
-      this.video.addEventListener('playing', ()=>{
-        this.$emit("playing");
+      this.video.addEventListener('durationchange', ()=>{
+        console.log(this.video.duration+"durationchange");      
+        this.duration = this.video.duration;
       })
-      this.video.addEventListener('pause', ()=>{
-        this.$emit("pause");
-      })
-      this.video.addEventListener('waiting', ()=>{
-        this.$emit("waiting");
-      })
-      this.video.addEventListener('play', ()=>{
-        this.$emit("play");
-      })
+      
       this.video.addEventListener('timeupdate', this.timeline)
       this.video.addEventListener('ended', (e) => {
             this.isPlay = false;
@@ -90,13 +106,16 @@ export default {
       this.video.pause();
     },
     timeline () {
-        this.precent = Math.floor((this.video.currentTime / this.video.duration)*100)
-        this.$emit("process",{precent:this.precent,currentTime:this.video.currentTime});
+        if(this.duration)
+        {
+          this.precent = Math.floor((this.video.currentTime / this.duration)*100)
+          this.$emit("process",{precent:this.precent,currentTime:this.video.currentTime});
+        }
     },
   }
 }
 </script>
-<style lang="less">
+<style lang="less" scoped>
 .video-play-box{
   width: 100%;
   height: 280px;

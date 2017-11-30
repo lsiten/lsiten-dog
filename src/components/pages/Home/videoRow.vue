@@ -42,36 +42,34 @@
                    </flexbox>
                 </div>
             </card>
+      <!-- 弹出评论页 -->
+      <coment-model :videoid="videoId" :visitabal="comentVisitable" @closeModel="_closeComent">
+      </coment-model>
   </div>
 </template>
 <script>
 import { Card, Flexbox, FlexboxItem } from "vux";
 import { mapState } from "vuex";
-import axios from "axios";
-import Mock from "mockjs";
-import queryString from "query-string";
+import comentModel from "./Comentmodel";
 export default {
   props: ["item"],
   methods: {
     //点赞功能
     like() {
-      let url = this.config.url.base + this.config.url.like;
       let isLike = 0 == this.item.isLike ? 1 : 0;
-      axios
-        .get(
-          url +
-            "?" +
-            queryString.stringify({ accessToken: "11dsdf", isLike: isLike })
-        )
-        .then(response => {
-          response = Mock.mock(response);
-          if (response.data.success) {
-            this.item.isLike = isLike;
-          }
+      this.$store.dispatch("dolike",{isLike:isLike,videoid:this.item.id,cb:this.cblike});
+    },
+    cblike(data){
+      if(data.success)
+      {
+        this.item.isLike = data.obj.isLike;
+      }
+      else{
+        this.$vux.toast.show({
+            text:data.obj.errorMsg,
+            type:"warn"
         })
-        .catch(error => {
-          console.log(error);
-        });
+      }
     },
     // 视频详情页
     goDetail(row){
@@ -79,13 +77,24 @@ export default {
     },
     // 评论功能，唤出评论页
     comment(row){
-
+      this.videoId = row.id;
+      this.comentVisitable = true;
+    },
+    _closeComent(){
+      this.comentVisitable = false;
     }
   },
   components: {
     Card,
     Flexbox,
-    FlexboxItem
+    FlexboxItem,
+    comentModel
+  },
+  data(){
+    return {
+      comentVisitable:false,
+      videoId:0,
+    }
   },
   computed: {
     ...mapState({
@@ -111,7 +120,7 @@ export default {
   position: relative;
   img {
     width: 100%;
-    height: auto;
+    max-height: 400px;
   }
   .video-play {
     width: 2em;

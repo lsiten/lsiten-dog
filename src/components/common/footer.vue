@@ -13,7 +13,7 @@
       </svg>
       <span slot="label">录制</span>
     </tabbar-item>
-    <tabbar-item badge="5" link="/user" :selected="route.path === '/user'">
+    <tabbar-item badge="" link="/user" :selected="route.path === '/user'">
       <svg class="icon" aria-hidden="true" slot="icon">
           <use xlink:href="#dog-user"></use>
       </svg>
