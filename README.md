@@ -105,7 +105,7 @@ assetsPublicPath: '',
 
 ![用户页面](readme/7.jpeg)
 
-##### 最后，如果该demo对你学习vue有帮助，麻烦给个star，谢谢#####
+##### 最后，如果该demo对你学习vue有帮助，麻烦给个star，谢谢
 
 ## 开启app
 
