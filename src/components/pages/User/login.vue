@@ -113,12 +113,21 @@ export default {
                 that.$router.replace({ name: "user" });
             }
         });
-         this.$store.commit("UPDATE_USER_ALL", data.data); 
+         this.$store.commit("UPDATE_USER_ALL", data.obj); 
       }
     },
     //获取验证码回掉
     getVerifyCode(data) {
-      console.log(data);
+      if(data.success)
+      {
+        console.log(data);
+      }
+      else{
+        this.$vux.toast.show({
+            text:"验证码获取错误！"+data.obj.errorMsg,
+            type:"error"
+        });
+      }
     },
     countFinish() {
       this.isVerify = false;

@@ -10,21 +10,38 @@
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
   "dependencies": {
-    "cordova-android": "^6.3.0",
+    "com.hutchind.cordova.plugins.streamingmedia": "~0.1.4",
+    "cordova-android": "^6.4.0",
     "cordova-browser": "^4.1.0",
+    "cordova-ios": "^4.5.4",
     "cordova-plugin-camera": "^3.0.0",
+    "cordova-plugin-file": "^5.0.0",
+    "cordova-plugin-file-transfer": "^1.7.0",
+    "cordova-plugin-media": "^4.0.0",
+    "cordova-plugin-media-capture": "^2.0.0",
+    "cordova-plugin-splashscreen": "^4.1.0",
+    "cordova-plugin-streaming-media": "^1.0.2",
     "cordova-plugin-whitelist": "^1.3.3"
   },
   "cordova": {
     "plugins": {
       "cordova-plugin-whitelist": {},
-      "cordova-plugin-camera": {}
+      "cordova-plugin-camera": {},
+      "cordova-plugin-media-capture": {},
+      "com.hutchind.cordova.plugins.streamingmedia": {},
+      "cordova-plugin-file-transfer": {},
+      "cordova-plugin-media": {},
+      "cordova-plugin-splashscreen": {}
     },
     "platforms": [
-      "android"
+      "android",
+      "ios"
     ]
   },
   "devDependencies": {
-    "babel-preset-es2015": "^6.24.1"
+    "babel-preset-es2015": "^6.24.1",
+    "cordova-common": "^2.1.1",
+    "elementtree": "^0.1.7",
+    "properties-parser": "^0.3.1"
   }
 }

@@ -10,8 +10,7 @@ let fun_axios_get = (api, cb) => {
   axios.get(api)
     .then((res) => {
       if (res.status >= 200 && res.status < 300) {
-        let data = Mock.mock(res.data);
-        cb(data);
+        cb(res.data);
       }
     })
     .catch((err) => {
@@ -23,8 +22,8 @@ let fun_axios_post = (api, body, cb) => {
   axios.post(api, body)
     .then((res) => {
       if (res.status >= 200 && res.status < 300) {
-        let data = Mock.mock(res.data);
-        cb(data);
+        //let data = Mock.mock(res.data);
+        cb(res.data);
       }
     })
     .catch((err) => {
@@ -66,16 +65,52 @@ export default {
     fun_axios_post(api, body, cb)
   },
   //获取图片signature
-  getImageSignature: (api, body, cb) => {
+  getSignature: (api, body, cb) => {
     fun_axios_post(api, body, cb)
   },
   //上传文件
-  uploadImage: (api, body, header, cb, uploading) => {
+  uploadFile: (api, body, header, cb, uploading) => {
     fun_axios_upload(api, body, header, cb, uploading)
   },
 
-  //
+  //更新用户信息
   updateUser: (api, body, cb) => {
+    fun_axios_post(api, body, cb)
+  },
+
+  //保存上传七牛视频的信息
+  saveVideoInfo: (api, body, cb) => {
+    fun_axios_post(api, body, cb)
+  },
+  //合并视频音频，并保存更新video，记录audio
+  MergeVideo: (api, body, cb) => {
+    fun_axios_post(api, body, cb)
+  },
+   //保存上传cloudinary视频的信息
+   addCloudinaryVideoInfo: (api, body, cb) => {
+    fun_axios_post(api, body, cb)
+  },
+  //保存视频创意的信息
+  creation: (api, body, cb) => {
+    fun_axios_post(api, body, cb)
+  },
+
+  //获取视频数据
+  getVideoList(api,cb){
+    fun_axios_get(api,cb);
+  },
+
+  //点赞功能
+  dolike(api,cb){
+    fun_axios_get(api,cb);
+  },
+
+  getComentLists(api,cb){
+    fun_axios_get(api,cb);
+  },
+
+  //提交评论
+  subComment(api, body, cb){
     fun_axios_post(api, body, cb)
   }
 }

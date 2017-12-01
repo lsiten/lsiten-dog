@@ -1,13 +1,34 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="cn.lsiten.dog" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <feature name="Camera">
+        <param name="android-package" value="org.apache.cordova.camera.CameraLauncher" />
+    </feature>
     <feature name="Whitelist">
         <param name="android-package" value="org.apache.cordova.whitelist.WhitelistPlugin" />
         <param name="onload" value="true" />
     </feature>
-    <feature name="Camera">
-        <param name="android-package" value="org.apache.cordova.camera.CameraLauncher" />
+    <feature name="File">
+        <param name="android-package" value="org.apache.cordova.file.FileUtils" />
+        <param name="onload" value="true" />
     </feature>
-    <name>狗狗说</name>
+    <allow-navigation href="cdvfile:*" />
+    <feature name="Capture">
+        <param name="android-package" value="org.apache.cordova.mediacapture.Capture" />
+    </feature>
+    <feature name="StreamingMedia">
+        <param name="android-package" value="com.hutchind.cordova.plugins.streamingmedia.StreamingMedia" />
+    </feature>
+    <feature name="FileTransfer">
+        <param name="android-package" value="org.apache.cordova.filetransfer.FileTransfer" />
+    </feature>
+    <feature name="Media">
+        <param name="android-package" value="org.apache.cordova.media.AudioHandler" />
+    </feature>
+    <feature name="SplashScreen">
+        <param name="android-package" value="org.apache.cordova.splashscreen.SplashScreen" />
+        <param name="onload" value="true" />
+    </feature>
+    <name>狗狗叨叨逼</name>
     <description>
         一个给狗狗配音的App
     </description>
@@ -16,12 +37,37 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    <access origin="cdvfile://*" />
+    <access origin="file://*" />
+    <access origin="file:///*" />
+    <allow-intent href="cdvfile://*" />
+    <allow-intent href="file://*" />
+    <allow-intent href="file:///*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
+    <allow-navigation href="cdvfile://*" />
+    <allow-navigation href="file://*" />
+    <allow-navigation href="file:///*" />
     <allow-intent href="market:*" />
+    <icon density="mdpi" src="res/icon/android/gougou-icon-mdpi.png" />
+    <icon density="hdpi" src="res/icon/android/gougou-icon-hdpi.png" />
+    <icon density="xhdpi" src="res/icon/android/gougou-icon-xhdpi.png" />
+    <icon density="xxhdpi" src="res/icon/android/gougou-icon-xxhdpi.png" />
+    <icon density="xxxhdpi" src="res/icon/android/gougou-icon-xxxhdpi.png" />
+    <splash density="land-hdpi" src="res/screen/android/splash-land.png" />
+    <splash density="land-ldpi" src="res/screen/android/splash-land.png" />
+    <splash density="land-mdpi" src="res/screen/android/splash-land.png" />
+    <splash density="land-xhdpi" src="res/screen/android/splash-land.png" />
+    <splash density="port-hdpi" src="res/screen/android/splash-port.png" />
+    <splash density="port-ldpi" src="res/screen/android/splash-port.png" />
+    <splash density="port-mdpi" src="res/screen/android/splash-port.png" />
+    <splash density="port-xhdpi" src="res/screen/android/splash-port.png" />
     <preference name="loglevel" value="DEBUG" />
+    <preference name="AutoHideSplashScreen" value="true" />
+    <preference name="AndroidPersistentFileLocation" value="Compatibility" />
+    <preference name="AndroidExtraFilesystems" value="files,files-external,documents,sdcard,cache,cache-external,assets,root" />
 </widget>

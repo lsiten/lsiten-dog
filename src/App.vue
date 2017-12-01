@@ -6,44 +6,27 @@
  */
 <template>
   <div id="app" style="height:100%">
-    <div v-transfer-dom>
-      <loading v-model="isLoading"></loading>
-    </div>
      <transition
         @after-enter="$vux.bus && $vux.bus.$emit('vux:after-view-enter')"
         :name="'vux-pop-' + (direction === 'forward' ? 'in' : 'out')">
            <router-view></router-view>
      </transition>
-       
   </div>
 </template>
 
 <script>
-import { Loading,TransferDom} from 'vux';
 import {mapActions,mapState} from 'vuex';
 export default {
   name: 'app',
-  directives: {
-    TransferDom
-  },
-  components: {
-     Loading
-  },
   computed: {
     ...mapState({
-      direction: state => state.direction,
-      isLoading: state => state.isLoading
+      direction: state => state.direction
     })
   },
   methods:{
     ...mapActions([
      'updateDemoPosition'
    ])
-  },
-  data(){
-    return {
-
-    }
   }
 }
 </script>

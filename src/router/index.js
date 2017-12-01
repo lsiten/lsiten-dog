@@ -16,6 +16,8 @@ import record from '@/components/pages/Record/record'
 
 // 用户相关页面
 import user from '@/components/pages/User/user'
+import myvideo from '@/components/pages/User/myvideo'
+
 import login from '@/components/pages/User/login'
 
 //错误页面
@@ -49,6 +51,11 @@ export default new Router({
           path: '/user',
           name: 'user',
           component: user
+        },
+        {
+          path: '/user/myvideo',
+          name: 'myvideo',
+          component: myvideo
         },
         {
           path: '*',

@@ -42,29 +42,20 @@
       <card>
          <div slot="content" class="card-demo-flex card-demo-content01">
            <div class="vux-1px-r">
-             <span>1130</span>
+             <span>{{user.score||0}}</span>
             <br/>
             我的积分
           </div>
           <div class="vux-1px-r">
-            <span>15</span>
+            <span>{{user.videonum||0}}</span>
              <br/>
-             我的经验
-          </div>
-          <div class="vux-1px-r">
-            <span>0</span>
-            <br/>
-            我的卡券
+             我的视频
           </div>
          </div>
       </card>
 
       <group>
-      <cell title="cell" value="hello" is-link></cell>
-      <cell is-link>
-        cell-box long long long long long long long
-      </cell>
-      <cell title="cell" value="hello" is-link></cell>
+      <cell title="我的视频" link="/user/myvideo" is-link></cell>
       <cell-box>
           <x-button type="warn"  @click.native="logout">退出登录</x-button>          
       </cell-box>
@@ -157,7 +148,7 @@ export default {
       editVistable: false,
       isSubmit: false,
       imageOption: {
-        destinationType: 0
+         destinationType: 0, //base64
       }
     };
   },
@@ -196,17 +187,18 @@ export default {
         this.asyncUser(body);
       }
     },
-  //退出登录
-  logout(){
-    this.$store.commit("USER_LOGOUT");
-    this.user={};
-  },
+    //退出登录
+    logout(){
+      this.$store.commit("USER_LOGOUT");
+      this.user={};
+      this.$router.replace({name:"login"});
+    },
 
     choosePhoto() {
       this.isShow = true;
     },
     cameraSuccess(url) {
-      url = "data:image/jpeg;base64," + url;
+      url = "data:image/jpeg;base64," + url; //base64
       this.avatarData = url;
       this.uploadAvatar();
     },
@@ -220,44 +212,75 @@ export default {
       this.timestamp = Date.now();
       //获取签名的id
       let signatureUrl = this.config.url.base + this.config.url.imageSignature;
+      //cloudinary图床实现
+      // let body = {
+      //     accessToken: this.user.accessToken,
+      //     timestamp: this.timestamp,
+      //     type: "avatar",
+      //     cloud:"cloudinary"
+      //   };
+      //七牛图床实现
+      let body = {
+          accessToken: this.user.accessToken,
+          type: "avatar",
+          cloud:"qiniu"
+        };    
       let param = {
         api: signatureUrl,
-        body: {
-          accessToken: this.user.accessToken,
-          timestamp: this.timestamp,
-          folder: "appDog/avatar",
-          tags: "app,avatar"
-        },
+        body: body,
         cb: this.cbSignature
       };
-      this.$store.dispatch("getImageSignature", param);
+      this.$store.dispatch("getSignature", param);
     },
+     //获取base64转blob
+    dataURItoBlob(dataURI) {
+          // convert base64/URLEncoded data component to raw binary data held in a string
+          var byteString;
+          if (dataURI.split(',')[0].indexOf('base64') >= 0)
+              byteString = atob(dataURI.split(',')[1]);
+          else
+              byteString = unescape(dataURI.split(',')[1]);
+          // separate out the mime component
+          var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+          // write the bytes of the string to a typed array
+          var ia = new Uint8Array(byteString.length);
+          for (var i = 0; i < byteString.length; i++) {
+              ia[i] = byteString.charCodeAt(i);
+          }
+          console.log(mimeString);
+          return new Blob([ia], {type:mimeString});
+      },
     //获取完signature的回调
     cbSignature(data) {
       if (data.success) {
-        let signature = data.data.signature;
-        let tags = "app,avatar";
-        let folder = "appDog/avatar";
-        let that = this;
-        signature =
-          "folder=" +
-          folder +
-          "&tags=" +
-          tags +
-          "&timestamp=" +
-          this.timestamp +
-          this.config.cloudinary.api_secret;
-        signature = sha1(signature);
-        let body = new FormData();
-        body.append("folder", folder);
-        body.append("signature", signature);
-        body.append("timestamp", this.timestamp);
-        body.append("tags", tags);
-        body.append("api_key", this.config.cloudinary.api_key);
-        body.append("resource_type", "image");
-        body.append("file", this.avatarData);
-        let imageURL =
-          this.config.cloudinary.apiBase + this.config.cloudinary.image;
+         let signature = data.obj.signature;
+         let body = new FormData();
+         let imageURL = "";
+        if(data.obj.key)
+        {
+          //七牛上传
+          let key = data.obj.key;
+          body.append("key", key);
+          body.append("token", signature);
+          body.append("file", this.dataURItoBlob(this.avatarData));
+          imageURL = this.config.qiniu.upload;
+        }
+        else
+        {
+          //cloudinary上传
+          let folder = data.obj.folder;
+          let tags = data.obj.tags;
+          let key = data.obj.key;
+          body.append("folder", folder);
+          body.append("signature", signature);
+          body.append("timestamp", this.timestamp);
+          body.append("tags", tags);
+          body.append("public_id", key);
+          body.append("api_key", this.config.cloudinary.api_key);
+          body.append("resource_type", "image");
+          body.append("file", this.avatarData);
+          imageURL = this.config.cloudinary.apiBase + this.config.cloudinary.image;
+        }      
         let param = {
           api: imageURL,
           body: body,
@@ -267,7 +290,14 @@ export default {
           cb: this.cbuploadAvatar,
           uploading: this.onUploading
         };
-        this.$store.dispatch("uploadImage", param);
+        this.$store.dispatch("uploadFile", param);
+      }
+      else
+      {
+        this.$vux.toast.show({
+            text:data.obj.errorMsg,
+            type:"warn"
+        })
       }
     },
     //正在上传的回调函数
@@ -279,7 +309,7 @@ export default {
         that.precent = Math.round(loaded / total * 100);
       });
     },
-    //上传头像后回掉
+    //cloudinary上传头像后回掉
     // bytes: 23910
     // created_at: "2017-11-16T10:54:39Z"
     // etag: "3a9f51bd20808ae4229e7791ada631c7"
@@ -295,19 +325,27 @@ export default {
     // url: "http://res.cloudinary.com/lsiten/image/upload/v1510829679/appDog/avatar/gwultrsdk1nrxgbgqtrx.jpg"
     // version: 1510829679
     // width: 640
+    //七牛上传的后回调数据
+    //hash 
+    //key 文件key
     cbuploadAvatar(data) {
       if (data.public_id) {
         this.user.avatar = data.url;
-        let user = this.user;
-        //如果已经登陆
-        if (user && user.accessToken) {
-          let body = {
-            accessToken: user.accessToken,
-            avatar: user.avatar
-          };
-          this.asyncUser(body);
-          this.isAvatar = true;
-        }
+      }
+      else
+      {
+        //七牛上传
+        this.user.avatar = this.config.qiniu.fileUrl + "/" +data.key;
+      }
+      let user = this.user;
+      //如果已经登陆
+      if (user && user.accessToken) {
+        let body = {
+          accessToken: user.accessToken,
+          avatar: user.avatar
+        };
+        this.asyncUser(body);
+        this.isAvatar = true;
       }
       this.isUpload = false;
       this.precent = 0;
@@ -325,6 +363,14 @@ export default {
     //用户信息更新回调
     cbUserUpdate(data) {
       if (data.success) {
+        if(data.obj.isempty)
+        {
+          this.$vux.toast.show({
+              text:data.obj.tips,
+              type:"warn"
+          })
+          return;
+        }
         if (this.isAvatar) {
           this.$vux.toast.show({
             text: "头像更新成功",
@@ -335,8 +381,15 @@ export default {
         else{
           this._closeEdit();
         }
-        this.user = _.assign(this.user, data.data);
+        this.user = _.assign(this.user, data.obj);
+        this.user.sex = this.user.sex.toString();
         this.$store.commit("UPDATE_USER_ALL", this.user); 
+      }
+      else{
+        this.$vux.toast.show({
+            text:data.obj.errorMsg,
+            type:"warn"
+        })
       }
     }
   },
