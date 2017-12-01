@@ -24,6 +24,9 @@
     },
     "cordova-plugin-media": {
       "PACKAGE_NAME": "cn.lsiten.dog"
+    },
+    "cordova-plugin-splashscreen": {
+      "PACKAGE_NAME": "cn.lsiten.dog"
     }
   },
   "dependent_plugins": {

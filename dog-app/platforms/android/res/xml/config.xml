@@ -24,7 +24,11 @@
     <feature name="Media">
         <param name="android-package" value="org.apache.cordova.media.AudioHandler" />
     </feature>
-    <name>狗狗说</name>
+    <feature name="SplashScreen">
+        <param name="android-package" value="org.apache.cordova.splashscreen.SplashScreen" />
+        <param name="onload" value="true" />
+    </feature>
+    <name>狗狗叨叨逼</name>
     <description>
         一个给狗狗配音的App
     </description>
@@ -49,7 +53,21 @@
     <allow-navigation href="file://*" />
     <allow-navigation href="file:///*" />
     <allow-intent href="market:*" />
+    <icon density="mdpi" src="res/icon/android/gougou-icon-mdpi.png" />
+    <icon density="hdpi" src="res/icon/android/gougou-icon-hdpi.png" />
+    <icon density="xhdpi" src="res/icon/android/gougou-icon-xhdpi.png" />
+    <icon density="xxhdpi" src="res/icon/android/gougou-icon-xxhdpi.png" />
+    <icon density="xxxhdpi" src="res/icon/android/gougou-icon-xxxhdpi.png" />
+    <splash density="land-hdpi" src="res/screen/android/splash-land.png" />
+    <splash density="land-ldpi" src="res/screen/android/splash-land.png" />
+    <splash density="land-mdpi" src="res/screen/android/splash-land.png" />
+    <splash density="land-xhdpi" src="res/screen/android/splash-land.png" />
+    <splash density="port-hdpi" src="res/screen/android/splash-port.png" />
+    <splash density="port-ldpi" src="res/screen/android/splash-port.png" />
+    <splash density="port-mdpi" src="res/screen/android/splash-port.png" />
+    <splash density="port-xhdpi" src="res/screen/android/splash-port.png" />
     <preference name="loglevel" value="DEBUG" />
+    <preference name="AutoHideSplashScreen" value="true" />
     <preference name="AndroidPersistentFileLocation" value="Compatibility" />
     <preference name="AndroidExtraFilesystems" value="files,files-external,documents,sdcard,cache,cache-external,assets,root" />
 </widget>

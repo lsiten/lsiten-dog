@@ -30,6 +30,7 @@
             v-on:play="onPlay" 
             v-on:pause="onPause" 
             v-on:waiting="onWaiting"></video-player>
+          <!-- 进度条 -->
           <div class="progressBox" v-show="isRecording">
               <x-progress :percent="recordPrecent" :show-cancel="false"></x-progress>
               <p class="tips">正在录制声音{{recordPrecent}}%</p>
@@ -38,10 +39,20 @@
               <p class="tips">正在初始化录音设备...</p>
           </div>
           <div class="recording-btn-box">
-              <div class="recording-btn-icon" :style="disableRecord?{background:'#c7c0bf'}:{}"  @click="doPrepareRecord">
-                <svg class="icon" aria-hidden="true" v-show="!prepareRecord && recorded">
+              <!-- 重新录制按钮 -->
+              <div v-show="isPreview" class="recording-btn-icon" :style="disableRecord?{background:'#c7c0bf'}:{}"  @click="doPrepareRecord">
+                <svg class="icon" aria-hidden="true" v-show="!prepareRecord">
                   <use xlink:href="#dog-zhongxin"></use>
                 </svg>
+                <div class="count-down-text" v-show="prepareRecord">
+                  <div>
+                     {{recordText}}
+                  </div>
+                  <countdown v-model="recordPreload" @on-finish="preRecord" :start="prepareRecord"></countdown>
+                </div>
+              </div>
+              <!-- 录音按钮 -->
+              <div class="recording-btn-icon" v-show="!isPreview && !isUploadAudio && !isMerge" :style="disableRecord?{background:'#c7c0bf'}:{}"  @click="doPrepareRecord">
                 <svg class="icon" aria-hidden="true" v-show="!prepareRecord && !recorded">
                   <use xlink:href="#dog-record-white-copy"></use>
                 </svg>
@@ -79,9 +90,11 @@
             </div>
           </div>
       </div>
+      <!-- 下一步 -->
       <div class="next-step" v-show="isPreview">
               <x-button plain style="border-radius:30px;" class="custom-primary-button" @click.native="dopublishModel">下一步</x-button>
       </div>
+      <!-- 点击显示相册选择 -->
     <div class="recordBox" @click="showCamera" v-show="!isUpload && !videoSrc">
       <div class="recordIcon">
         <div class="Dogrecording">
@@ -185,6 +198,7 @@ export default {
         takeVideo: "拍摄10s视频"
       },
       videoSrc:"",
+      oldVideoSrc:"",
       video_public_id:"",
       qiniu_key:"",
       videoOptions:{
@@ -276,7 +290,7 @@ export default {
         console.log(video.video.duration);
         video.reloadvideo();
         video.video.autoplay=true;
-         video.playVideo(); 
+        video.playVideo(); 
        })
     },
     readAudioFile(isUpload){
@@ -427,9 +441,23 @@ export default {
        return;
       if(this.disableRecord)
         return;
-      this.prepareRecord = true;
+      if(this.isPreview)
+      {
+        this.disableRecord = true;
+        this.videoSrc = this.oldVideoSrc;
+        this.videoOptions = {
+          playStatus:"autoplay",
+            muteStatus:true,
+            height:"280",
+            width:"100%",
+            poster:""
+          };
+        return ;
+      }
       this.recorded = false;
+      this.prepareRecord = true;
     },
+
     preRecord(){
       this.recordText = "GO";
       this.recordPreload = 3;
@@ -438,10 +466,9 @@ export default {
         that.recordText = "";
         that.prepareRecord = false;
         that.isRecording = true;
-        that.disableRecord = true;
         that.recordPrecent = 0;
+        that.disableRecord = true;        
         that.isPreview = false;
-        that.videoOptions.muteStatus = true;
         that.$nextTick(()=>{
           let videoPlay = that.$refs.videoPlay;
           videoPlay.playVideo();
@@ -451,6 +478,12 @@ export default {
       }, 1000);
     },
     endRecord(){
+      if(this.isPreview)
+      {
+        //开始倒计时
+        this.prepareRecord = true;
+        this.recorded = false;
+      }
       if(this.disableRecord)
       {
         //播放完视频就允许开始录制
@@ -482,14 +515,11 @@ export default {
       }
     },
     onVideoProcess(data){
-      console.log("onVideoProcess");   
-      console.log(data);   
       if(this.isRecording){
         this.recordPrecent = data.precent;
       }    
     },
     recordSuccess(){
-      console.log("start recording");
       if(this.recorded)
       {
         this.isUploadAudio = true;
@@ -512,7 +542,6 @@ export default {
       this.isMerge = false;
       this.isUploadAudio = false;
       this.videoSrc = "";
-      this.videoSrc= "";
       this.video_public_id= "";
       this.qiniu_key= "";
       this.videoOptions = {
@@ -531,7 +560,8 @@ export default {
       this.isShow = true;
     },
     cameraSuccess(files) {
-      this.initData();
+      if(this.isChangeVideo)
+         this.initData();
       let file = "";
       if(files[0].fullPath)
       {
@@ -585,7 +615,6 @@ export default {
           params.key = key;
           params.token = signature;
           options.params = params;
-
           let ft = new FileTransfer();
           ft.onprogress = this.onUploading;
           ft.upload(this.videoUri, encodeURI(imageURL), this.cbuploadVideo, this.cbuploadVideoFail, options);
@@ -612,6 +641,7 @@ export default {
       let dataString = data.response;
       data = JSON.parse(dataString);
       this.videoSrc = this.config.qiniu.fileUrl + "/" +data.key;
+      this.oldVideoSrc = this.config.qiniu.fileUrl + "/" +data.key;
       this.isUpload = false;
       this.isChangeVideo = false;      
       this.precent = 0;
@@ -820,7 +850,7 @@ body{
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 310px;
+  height: 280px;
   background: rgba(0,0,0,0.85);
   z-index: 99;
   top: 0;

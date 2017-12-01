@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="cn.lsiten.dog" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>狗狗说</name>
+    <name>狗狗叨叨逼</name>
     <description>
         一个给狗狗配音的App
     </description>
@@ -24,8 +24,22 @@
     <allow-navigation href="cdvfile://*" />
     <allow-navigation href="file://*" />
     <allow-navigation href="file:///*" />
+    <preference name="AutoHideSplashScreen" value="true" />
     <platform name="android">
         <allow-intent href="market:*" />
+        <icon density="mdpi" src="res/icon/android/gougou-icon-mdpi.png" />
+        <icon density="hdpi" src="res/icon/android/gougou-icon-hdpi.png" />
+        <icon density="xhdpi" src="res/icon/android/gougou-icon-xhdpi.png" />
+        <icon density="xxhdpi" src="res/icon/android/gougou-icon-xxhdpi.png" />
+        <icon density="xxxhdpi" src="res/icon/android/gougou-icon-xxxhdpi.png" />
+        <splash density="land-hdpi" src="res/screen/android/splash-land.png" />
+        <splash density="land-ldpi" src="res/screen/android/splash-land.png" />
+        <splash density="land-mdpi" src="res/screen/android/splash-land.png" />
+        <splash density="land-xhdpi" src="res/screen/android/splash-land.png" />
+        <splash density="port-hdpi" src="res/screen/android/splash-port.png" />
+        <splash density="port-ldpi" src="res/screen/android/splash-port.png" />
+        <splash density="port-mdpi" src="res/screen/android/splash-port.png" />
+        <splash density="port-xhdpi" src="res/screen/android/splash-port.png" />
         <preference name="AndroidPersistentFileLocation" value="Internal" />
         <preference name="AndroidPersistentFileLocation" value="Compatibility" />
         <preference name="AndroidExtraFilesystems" value="files,files-external,documents,sdcard,cache,cache-external,assets,root" />
@@ -33,6 +47,15 @@
     <platform name="ios">
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
+        <icon height="180" src="res/icon/ios/gougou-icon-60@3x.png" width="180" />
+        <icon height="120" src="res/icon/ios/gougou-icon-60@2x.png" width="120" />
+        <icon height="76" src="res/icon/ios/gougou-icon-76.png" width="76" />
+        <icon height="152" src="res/icon/ios/gougou-icon-76@2x.png" width="152" />
+        <icon height="40" src="res/icon/ios/gougou-icon-40.png" width="40" />
+        <icon height="80" src="res/icon/ios/gougou-icon-40@2x.png" width="80" />
+        <icon height="29" src="res/icon/ios/gougou-icon-29.png" width="29" />
+        <icon height="58" src="res/icon/ios/gougou-icon-29@2x.png" width="58" />
+        <icon height="167" src="res/icon/ios/gougou-icon-83.5@2x.png" width="167" />
         <preference name="iosPersistentFileLocation" value="Library" />
         <preference name="iosPersistentFileLocation" value="Compatibility" />
         <preference name="iosExtraFilesystems" value="library,library-nosync,documents,documents-nosync,cache,bundle,root" />
@@ -45,4 +68,5 @@
     <plugin name="com.hutchind.cordova.plugins.streamingmedia" spec="~0.1.4" />
     <plugin name="cordova-plugin-file-transfer" spec="^1.7.0" />
     <plugin name="cordova-plugin-media" spec="^4.0.0" />
+    <plugin name="cordova-plugin-splashscreen" spec="^4.1.0" />
 </widget>

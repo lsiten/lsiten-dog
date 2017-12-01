@@ -306,6 +306,14 @@ module.exports = [
     "clobbers": [
       "window.Media"
     ]
+  },
+  {
+    "id": "cordova-plugin-splashscreen.SplashScreen",
+    "file": "plugins/cordova-plugin-splashscreen/www/splashscreen.js",
+    "pluginId": "cordova-plugin-splashscreen",
+    "clobbers": [
+      "navigator.splashscreen"
+    ]
   }
 ];
 module.exports.metadata = 
@@ -317,7 +325,8 @@ module.exports.metadata =
   "cordova-plugin-media-capture": "2.0.0",
   "com.hutchind.cordova.plugins.streamingmedia": "0.1.4",
   "cordova-plugin-file-transfer": "1.7.0",
-  "cordova-plugin-media": "4.0.0"
+  "cordova-plugin-media": "4.0.0",
+  "cordova-plugin-splashscreen": "4.1.0"
 };
 // BOTTOM OF METADATA
 });

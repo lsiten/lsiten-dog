@@ -1,7 +1,7 @@
 <template>
   <div>      
     <div class="video-play-box">
-        <video ref="myvideo" :src="src" :muted="options.muteStatus" :poster="options.poster" :height="options.height" v-bind:style={width:options.width} preload="auto" @click="pauseVideo">
+        <video ref="myvideo" :src="src" :muted="options.muteStatus" :poster="options.poster" :height="options.height" v-bind:style={width:options.width} preload="load" @click="pauseVideo">
                your browser does not support the video tag
         </video>
         <div class="video-play-button" v-show="isLoaded && !isPlay">

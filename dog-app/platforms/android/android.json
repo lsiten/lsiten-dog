@@ -39,6 +39,10 @@
             {
               "xml": "<feature name=\"Media\"><param name=\"android-package\" value=\"org.apache.cordova.media.AudioHandler\" /></feature>",
               "count": 1
+            },
+            {
+              "xml": "<feature name=\"SplashScreen\"><param name=\"android-package\" value=\"org.apache.cordova.splashscreen.SplashScreen\" /><param name=\"onload\" value=\"true\" /></feature>",
+              "count": 1
             }
           ]
         }
@@ -117,6 +121,9 @@
       "PACKAGE_NAME": "cn.lsiten.dog"
     },
     "cordova-plugin-media": {
+      "PACKAGE_NAME": "cn.lsiten.dog"
+    },
+    "cordova-plugin-splashscreen": {
       "PACKAGE_NAME": "cn.lsiten.dog"
     }
   },
@@ -434,6 +441,14 @@
       "clobbers": [
         "window.Media"
       ]
+    },
+    {
+      "id": "cordova-plugin-splashscreen.SplashScreen",
+      "file": "plugins/cordova-plugin-splashscreen/www/splashscreen.js",
+      "pluginId": "cordova-plugin-splashscreen",
+      "clobbers": [
+        "navigator.splashscreen"
+      ]
     }
   ],
   "plugin_metadata": {
@@ -443,6 +458,7 @@
     "cordova-plugin-media-capture": "2.0.0",
     "com.hutchind.cordova.plugins.streamingmedia": "0.1.4",
     "cordova-plugin-file-transfer": "1.7.0",
-    "cordova-plugin-media": "4.0.0"
+    "cordova-plugin-media": "4.0.0",
+    "cordova-plugin-splashscreen": "4.1.0"
   }
 }
