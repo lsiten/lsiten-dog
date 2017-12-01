@@ -36,6 +36,14 @@ vuex文档 : [https://vuex.vuejs.org/](https://vuex.vuejs.org/)
 >8、[iconfont图标库的使用](http://iconfont.cn/)
 >
 >9、螺丝帽Api实现短信验证码
+>
+>10、七牛图床上传
+>
+>11、cloudinary图床上传
+>
+>12、cloudinary视频音频处理API，实现缩略图，视频音频合并【[cloudinary](https://cloudinary.com/documentation/video_manipulation_and_delivery)】
+>
+>13、使用video自定义h5视频播放器
 
 ## 完成功能
 >1、App图标，启动页的制作
