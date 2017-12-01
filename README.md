@@ -2,20 +2,19 @@
 
 > 一款给狗狗配音的app
 
-## Build Setup
+## 开启app
 
 ``` bash
 # install dependencies
 npm install
 
-# serve with hot reload at localhost:8080
-npm run dev
-
 # build for production with minification
 npm run build
 
-# build for production and view the bundle analyzer report
-npm run build --report
-```
+# 进入cordova的项目目录
+cd dog-app
 
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+# 进行编译
+cordova run android
+
+```
